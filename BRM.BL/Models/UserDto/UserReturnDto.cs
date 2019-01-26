@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using BRM.DAO.Entities;
+using BRM.BL.Models.PermissionDto;
 
 namespace BRM.BL.Models.UserDto
 {

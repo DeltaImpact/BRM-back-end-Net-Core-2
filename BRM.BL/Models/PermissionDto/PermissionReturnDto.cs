@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using BRM.DAO.Entities;
-
-namespace BRM.BL.Models.UserDto
+﻿namespace BRM.BL.Models.PermissionDto
 {
     public class PermissionReturnDto
     {

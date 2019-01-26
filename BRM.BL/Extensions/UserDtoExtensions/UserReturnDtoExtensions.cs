@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using BRM.BL.Models.PermissionDto;
 using BRM.BL.Models.UserDto;
 using BRM.DAO.Entities;
 

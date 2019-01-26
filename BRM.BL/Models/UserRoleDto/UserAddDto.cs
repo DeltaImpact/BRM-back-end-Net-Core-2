@@ -1,4 +1,5 @@
-﻿using BRM.BL.Models.UserDto;
+﻿using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.UserDto;
 
 namespace BRM.BL.Models.UserRoleDto
 {

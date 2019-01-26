@@ -1,11 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.BL.RolesService;
+using BRM.BL.UsersRolesService;
 using Microsoft.AspNetCore.Mvc;
-using BRM.BL.UserService;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BRM.Controllers
 {
@@ -39,12 +38,12 @@ namespace BRM.Controllers
 
         [HttpPost("addRole")]
         public async Task<IActionResult> AddRole(
-            [FromBody] [Required] string roleName
+            RoleAddDto dto
         )
         {
             try
             {
-                var responsePayload = await _rolesService.AddRole(roleName);
+                var responsePayload = await _rolesService.AddRole(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
@@ -55,7 +54,7 @@ namespace BRM.Controllers
 
         [HttpPost("addRoleToUser")]
         public async Task<IActionResult> AddRoleToUser(
-            [FromBody] UserRoleUpdateDto dto
+            [FromBody] UserRoleOrPermissionUpdateDto dto
         )
         {
             try
@@ -65,13 +64,13 @@ namespace BRM.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return BadRequest(new {ex.Message});
             }
         }
 
         [HttpPost("deleteRoleFromUser")]
         public async Task<IActionResult> RemoveRoleFromUser(
-            [FromBody] UserRoleUpdateDto dto
+            [FromBody] UserRoleOrPermissionUpdateDto dto
         )
         {
             try
@@ -81,7 +80,7 @@ namespace BRM.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return BadRequest(new {ex.Message});
             }
         }
     }

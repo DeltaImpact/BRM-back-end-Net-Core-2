@@ -4,10 +4,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using BRM.DAO.Data;
 using BRM.DAO.Entities;
-using BRM.DAO.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace BackSide2.DAO.Repository
+namespace BRM.DAO.Repository
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {

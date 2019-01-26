@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BRM.DAO.Entities
+﻿namespace BRM.DAO.Entities
 {
     public class UsersRoles : BaseEntity
     {

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using BRM.BL.Extensions.PermissionDtoExtensions;
-using BRM.BL.Models.UserDto;
+﻿using BRM.BL.Extensions.PermissionDtoExtensions;
+using BRM.BL.Extensions.UserDtoExtensions;
 using BRM.BL.Models.UserPermissionDto;
-using BRM.BL.Models.UserRoleDto;
 using BRM.DAO.Entities;
 
-namespace BRM.BL.Extensions.UserDtoExtensions
+namespace BRM.BL.Extensions.UserPermissionExtensions
 {
     static class UserPermissionExtensions
     {

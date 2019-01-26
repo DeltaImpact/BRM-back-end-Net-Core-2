@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BRM.DAO.Entities;
 
-namespace BRM.BL.Models.UserDto
+namespace BRM.BL.Models.RoleDto
 {
     public class RoleReturnDto
     {

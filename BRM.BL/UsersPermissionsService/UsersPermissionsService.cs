@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using BackSide2.BL.Exceptions;
-using BRM.BL.Extensions.UserDtoExtensions;
+using BRM.BL.Exceptions;
+using BRM.BL.Extensions.UserPermissionExtensions;
 using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserPermissionDto;
 using BRM.BL.Models.UserRoleDto;
@@ -14,33 +14,29 @@ namespace BRM.BL.UsersPermissionsService
 {
     public class UsersPermissionsService : IUsersPermissionsService
     {
-        private readonly IRepository<UsersRoles> _usersRoles;
-        private readonly IRepository<User> _userService;
+        private readonly IUserService _userService;
+        private readonly IRepository<User> _userRepository;
         private readonly IRepository<UsersPermissions> _usersPermissions;
-        private readonly IRepository<Role> _roleService;
         private readonly IRepository<Permission> _permissionService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsersPermissionsService(
-            IRepository<User> userService,
+            IUserService userService,
+            IRepository<User> userRepository,
             IRepository<UsersPermissions> usersPermissions,
-            IRepository<UsersRoles> usersRoles,
-            IRepository<Role> roleService,
-            IRepository<Permission> permissionService,
-            IHttpContextAccessor httpContextAccessor)
+            IRepository<Permission> permissionService
+        )
         {
-            _usersRoles = usersRoles;
             _userService = userService;
+            _userRepository = userRepository;
             _usersPermissions = usersPermissions;
-            _roleService = roleService;
+
             _permissionService = permissionService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserPermissionReturnDto> AddPermissionToUser(long userId, long permissionId)
+        public async Task<UserReturnDto> AddPermissionToUser(long userId, long permissionId)
         {
             var user =
-                await _userService.GetByIdAsync(userId);
+                await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
@@ -58,7 +54,7 @@ namespace BRM.BL.UsersPermissionsService
             var userToRoleConnection =
                 await (await _usersPermissions.GetAllAsync(d => d.User == user && d.Permission == permission))
                     .FirstOrDefaultAsync();
-            
+
             if (userToRoleConnection != null)
             {
                 throw new ObjectNotFoundException("User already have role.");
@@ -71,39 +67,41 @@ namespace BRM.BL.UsersPermissionsService
             };
 
             var connection = (await _usersPermissions.InsertAsync(userToRoleForDb));
-            
-            return connection.ToUserPermissionReturnDto();
+
+            return await _userService.GetUser(connection.User.UserName);
         }
 
-        public async Task<UserPermissionReturnDto> DeletePermissionFromUser(long userId, long permissionId)
+        public async Task<UserReturnDto> DeletePermissionFromUser(long userId, long permissionId)
         {
             var user =
-                await _userService.GetByIdAsync(userId);
+                await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
                 throw new ObjectNotFoundException("User not found.");
             }
 
-            var role =
-                await _usersPermissions.GetByIdAsync(permissionId);
-
-            if (role == null)
-            {
-                throw new ObjectNotFoundException("User permission not found.");
-            }
-
-            var userToRoleConnection =
-                await(await _usersPermissions.GetAllAsync(d => d.User == user && d.Permission == role.Permission))
+            var userToPermissionConnection =
+                await (await _usersPermissions.GetAllAsync(d => d.User == user && d.Permission.Id == permissionId, i => i.User))
                     .FirstOrDefaultAsync();
 
-            if (userToRoleConnection == null)
+            if (userToPermissionConnection == null)
             {
                 throw new ObjectNotFoundException("User permission not found.");
             }
 
-            var removedRole = await _usersPermissions.RemoveAsync(userToRoleConnection);
-            return removedRole.ToUserPermissionReturnDto();
+            var removedPermission = await _usersPermissions.RemoveAsync(userToPermissionConnection);
+            return await _userService.GetUser(removedPermission.User.UserName);
+        }
+
+        public Task<UserReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto)
+        {
+            return AddPermissionToUser(dto.UserId, dto.RoleOrPermissionId);
+        }
+
+        public Task<UserReturnDto> DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto)
+        {
+            return DeletePermissionFromUser(dto.UserId, dto.RoleOrPermissionId);
         }
 
         public async Task DeleteAllPermissionConnections(long permissionId)
@@ -117,13 +115,12 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var allRoleConnections =
-                await(await _usersPermissions.GetAllAsync(d => d.Permission == permissions)).ToListAsync();
+                await (await _usersPermissions.GetAllAsync(d => d.Permission == permissions)).ToListAsync();
 
             foreach (var roleConnection in allRoleConnections)
             {
                 await _usersPermissions.RemoveAsync(roleConnection);
             }
-
         }
     }
 }

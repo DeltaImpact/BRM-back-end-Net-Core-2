@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models.RoleDto;
 using Microsoft.AspNetCore.Mvc;
 using BRM.BL.UserService;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BRM.Controllers
 {
@@ -20,12 +20,12 @@ namespace BRM.Controllers
 
         [HttpGet("user")]
         public async Task<IActionResult> GetUser(
-            [Required] string userNickname
+            UserAddDto dto
         )
         {
             try
             {
-                var user = await _userService.GetUser(userNickname);
+                var user = await _userService.GetUser(dto);
                 return Ok(user);
             }
             catch (Exception ex)
@@ -51,12 +51,12 @@ namespace BRM.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(
-            [FromBody] [Required] string username
+            UserAddDto dto
         )
         {
             try
             {
-                var responsePayload = await _userService.AddUser(username);
+                var responsePayload = await _userService.AddUser(dto);
                 return Ok(responsePayload);
                 //return Ok();
             }

@@ -1,13 +1,13 @@
-﻿using BackSide2.DAO.Repository;
-using BRM.BL.PermissionsService;
+﻿using BRM.BL.PermissionsService;
 using BRM.BL.RolesService;
 using BRM.BL.UsersPermissionsService;
+using BRM.BL.UsersRolesService;
 using BRM.BL.UserService;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BackSide2.Extensions
+namespace BRM.Extensions
 {
     public static class ConfigureContainerExtensions
     {

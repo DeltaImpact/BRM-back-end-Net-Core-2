@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserPermissionDto;
 using BRM.BL.Models.UserRoleDto;
 
-namespace BRM.BL.UserService
+namespace BRM.BL.UsersPermissionsService
 {
     public interface IUsersPermissionsService
     {
-        Task<UserPermissionReturnDto> AddPermissionToUser(long userId, long permissionId);
-        Task<UserPermissionReturnDto> DeletePermissionFromUser(long userId, long permissionId);
+        Task<UserReturnDto> AddPermissionToUser(long userId, long permissionId);
+        Task<UserReturnDto> DeletePermissionFromUser(long userId, long permissionId);
+        Task<UserReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto);
+        Task<UserReturnDto> DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto);
         Task DeleteAllPermissionConnections(long permissionId);
         
     }

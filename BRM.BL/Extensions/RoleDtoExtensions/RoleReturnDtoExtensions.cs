@@ -1,4 +1,4 @@
-﻿using BRM.BL.Models.UserDto;
+﻿using BRM.BL.Models.PermissionDto;
 using BRM.DAO.Entities;
 
 namespace BRM.BL.Extensions.RoleDtoExtensions

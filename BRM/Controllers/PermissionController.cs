@@ -1,11 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models.RoleDto;
+using BRM.BL.Models.UserRoleDto;
 using BRM.BL.PermissionsService;
-using BRM.BL.RolesService;
+using BRM.BL.UsersPermissionsService;
 using Microsoft.AspNetCore.Mvc;
-using BRM.BL.UserService;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BRM.Controllers
 {
@@ -14,10 +13,12 @@ namespace BRM.Controllers
     public class PermissionController : ControllerBase
     {
         private readonly IPermissionsService _permissionsService;
+        private readonly IUsersPermissionsService _usersPermissionsService;
 
-        public PermissionController(IPermissionsService permissionsService)
+        public PermissionController(IPermissionsService permissionsService, IUsersPermissionsService usersPermissionsService)
         {
             _permissionsService = permissionsService;
+            _usersPermissionsService = usersPermissionsService;
         }
 
         [HttpGet("permissions")]
@@ -37,17 +38,50 @@ namespace BRM.Controllers
 
         [HttpPost("addPermission")]
         public async Task<IActionResult> AddPermission(
-            [FromBody] [Required] string permissionName
+            PermissionAddDto dto
         )
         {
             try
             {
-                var responsePayload = await _permissionsService.AddPermission(permissionName);
+                var responsePayload = await _permissionsService.AddPermission(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
             {
                 return BadRequest(new {ex.Message});
+            }
+        }
+
+
+        [HttpPost("addPermissionToUser")]
+        public async Task<IActionResult> AddPermissionToUser(
+            [FromBody] UserRoleOrPermissionUpdateDto dto
+        )
+        {
+            try
+            {
+                var responsePayload = await _usersPermissionsService.AddPermissionToUser(dto);
+                return Ok(responsePayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+        }
+
+        [HttpPost("deletePermissionFromUser")]
+        public async Task<IActionResult> RemovePermissionFromUser(
+            [FromBody] UserRoleOrPermissionUpdateDto dto
+        )
+        {
+            try
+            {
+                var responsePayload = await _usersPermissionsService.DeletePermissionFromUser(dto);
+                return Ok(responsePayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
             }
         }
     }

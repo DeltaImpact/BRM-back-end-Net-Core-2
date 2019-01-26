@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BackSide2.BL.Exceptions;
+using BRM.BL.Exceptions;
 using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserDtoExtensions;
+using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
@@ -38,6 +39,11 @@ namespace BRM.BL.UserService
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public Task<UserReturnDto> AddUser(UserAddDto dto)
+        {
+            return AddUser(dto.username);
+        }
+
         public async Task<UserReturnDto> AddUser(string nickname)
         {
             var userInDb =
@@ -59,6 +65,11 @@ namespace BRM.BL.UserService
             return user;
 
             //throw new NotImplementedException();
+        }
+
+        public Task<UserReturnDto> GetUser(UserAddDto dto)
+        {
+            return GetUser(dto.username);
         }
 
         public async Task<UserReturnDto> GetUser(string nickname)

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace BackSide2.BL.Exceptions
+namespace BRM.BL.Exceptions
 {
     [Serializable]
     internal class ObjectAlreadyExistException : Exception
