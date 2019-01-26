@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BackSide2.BL.Exceptions;
+using BRM.BL.Exceptions;
 using BRM.BL.Extensions.RoleDtoExtensions;
-using BRM.BL.Extensions.UserDtoExtensions;
-using BRM.BL.Models.UserDto;
-using BRM.BL.Models.UserRoleDto;
+using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.RoleDto;
+using BRM.BL.UsersRolesService;
 using BRM.BL.UserService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
@@ -43,10 +43,10 @@ namespace BRM.BL.RolesService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<PermissionReturnDto> AddRole(string roleName)
+        public async Task<PermissionReturnDto> AddRole(RoleAddDto dto)
         {
             var roleInDb =
-                await (await _roleService.GetAllAsync(d => d.Name == roleName))
+                await (await _roleService.GetAllAsync(d => d.Name == dto.RoleName))
                     .FirstOrDefaultAsync();
             if (roleInDb != null)
             {
@@ -55,7 +55,7 @@ namespace BRM.BL.RolesService
 
             var userForDb = new Role
             {
-                Name = roleName,
+                Name = dto.RoleName,
             };
 
             var user = (await _roleService.InsertAsync(userForDb));
@@ -75,6 +75,11 @@ namespace BRM.BL.RolesService
             return roles;
         }
 
+        public async Task<PermissionReturnDto> DeleteRole(DeleteByIdDto dto)
+        {
+            return await DeleteRole(dto.Id);
+        }
+
         public async Task<PermissionReturnDto> DeleteRole(long roleId)
         {
             var role =
@@ -82,7 +87,7 @@ namespace BRM.BL.RolesService
 
             if (role == null)
             {
-                throw new ObjectNotFoundException("UserRole not found.");
+                throw new ObjectNotFoundException("Role not found.");
             }
 
             await _usersRolesService.DeleteAllRoleConnections(role.Id);

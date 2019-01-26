@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using BRM.BL.Models.UserDto;
+using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.RoleDto;
 
 namespace BRM.BL.RolesService
 {
     public interface IRolesService
     {
-        Task<PermissionReturnDto> AddRole(string roleName);
+        Task<PermissionReturnDto> AddRole(RoleAddDto roleName);
         Task<List<PermissionReturnDto>> GetRoles();
         Task<PermissionReturnDto> DeleteRole(long roleId);
         

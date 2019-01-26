@@ -1,24 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BackSide2.BL.Exceptions;
+using BRM.BL.Exceptions;
 using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.RoleDtoExtensions;
-using BRM.BL.Extensions.UserDtoExtensions;
-using BRM.BL.Models.UserDto;
-using BRM.BL.Models.UserRoleDto;
-using BRM.BL.PermissionsService;
+using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.RoleDto;
+using BRM.BL.UsersPermissionsService;
+using BRM.BL.UsersRolesService;
 using BRM.BL.UserService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace BRM.BL.RolesService
+namespace BRM.BL.PermissionsService
 {
     public class PermissionsService : IPermissionsService
     {
         private readonly IRepository<UsersRoles> _usersRoles;
+        private readonly IUsersPermissionsService _usersPermissionsService;
         private readonly IRepository<User> _user;
         private readonly IRepository<UsersPermissions> _usersPermissions;
         private readonly IRepository<Role> _roleService;
@@ -28,6 +29,7 @@ namespace BRM.BL.RolesService
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PermissionsService(
+            IUsersPermissionsService usersPermissionsService,
             IRepository<User> user,
             IRepository<UsersPermissions> usersPermissions,
             IRepository<UsersRoles> usersRoles,
@@ -36,6 +38,7 @@ namespace BRM.BL.RolesService
             IUsersRolesService usersRolesService,
             IHttpContextAccessor httpContextAccessor)
         {
+            _usersPermissionsService = usersPermissionsService;
             _user = user;
             _usersPermissions = usersPermissions;
             _usersRoles = usersRoles;
@@ -46,10 +49,10 @@ namespace BRM.BL.RolesService
         }
 
 
-        public async Task<PermissionReturnDto> AddPermission(string permissionName)
+        public async Task<PermissionReturnDto> AddPermission(PermissionAddDto dto)
         {
             var roleInDb =
-                await (await _permissionService.GetAllAsync(d => d.Name == permissionName))
+                await (await _permissionService.GetAllAsync(d => d.Name == dto.permissionName))
                     .FirstOrDefaultAsync();
             if (roleInDb != null)
             {
@@ -58,7 +61,7 @@ namespace BRM.BL.RolesService
 
             var userForDb = new Permission
             {
-                Name = permissionName,
+                Name = dto.permissionName,
             };
 
             var user = (await _permissionService.InsertAsync(userForDb));
@@ -74,6 +77,22 @@ namespace BRM.BL.RolesService
                 .ToList();
 
             return items;
+        }
+
+        public async Task<PermissionReturnDto> DeletePermission(long permissionId)
+        {
+            var role =
+                await _permissionService.GetByIdAsync(permissionId);
+
+            if (role == null)
+            {
+                throw new ObjectNotFoundException("Role not found.");
+            }
+
+            await _usersPermissionsService.DeleteAllPermissionConnections(role.Id);
+
+            var removedPin = await _permissionService.RemoveAsync(role);
+            return removedPin.ToPermissionReturnDto();
         }
     }
 }
