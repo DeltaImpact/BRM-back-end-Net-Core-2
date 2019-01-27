@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.UserPermissionExtensions;
+using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserPermissionDto;
 using BRM.BL.Models.UserRoleDto;
@@ -121,6 +122,35 @@ namespace BRM.BL.UsersPermissionsService
             {
                 await _usersPermissions.RemoveAsync(roleConnection);
             }
+        }
+
+        public async Task DeleteAllPermissionFromUser(long userId)
+        {
+            var user =
+                await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new ObjectNotFoundException("User not found.");
+            }
+
+            var allPermissionToUserConnections =
+                await (await _usersPermissions.GetAllAsync(d => d.User.Id == userId)).ToListAsync();
+
+            foreach (var userConnection in allPermissionToUserConnections)
+            {
+                await _usersPermissions.RemoveAsync(userConnection);
+            }
+        }
+
+        public async Task DeleteAllPermissionConnections(DeleteByIdDto dto)
+        {
+            await DeleteAllPermissionConnections(dto.Id);
+        }
+
+        public async Task DeleteAllPermissionFromUser(DeleteByIdDto dto)
+        {
+            await DeleteAllPermissionFromUser(dto.Id);
         }
     }
 }

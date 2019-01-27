@@ -55,7 +55,7 @@ namespace BRM.Controllers
 
         [HttpPost("addPermissionToUser")]
         public async Task<IActionResult> AddPermissionToUser(
-            [FromBody] UserRoleOrPermissionUpdateDto dto
+            UserRoleOrPermissionUpdateDto dto
         )
         {
             try
@@ -71,12 +71,29 @@ namespace BRM.Controllers
 
         [HttpPost("deletePermissionFromUser")]
         public async Task<IActionResult> RemovePermissionFromUser(
-            [FromBody] UserRoleOrPermissionUpdateDto dto
+            UserRoleOrPermissionUpdateDto dto
         )
         {
             try
             {
                 var responsePayload = await _usersPermissionsService.DeletePermissionFromUser(dto);
+                return Ok(responsePayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+        }
+
+
+        [HttpPost("deletePermission")]
+        public async Task<IActionResult> RemovePermission(
+            [FromBody] DeleteByIdDto dto
+        )
+        {
+            try
+            {
+                var responsePayload = await _permissionsService.DeletePermission(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)

@@ -18,34 +18,15 @@ namespace BRM.BL.PermissionsService
 {
     public class PermissionsService : IPermissionsService
     {
-        private readonly IRepository<UsersRoles> _usersRoles;
         private readonly IUsersPermissionsService _usersPermissionsService;
-        private readonly IRepository<User> _user;
-        private readonly IRepository<UsersPermissions> _usersPermissions;
-        private readonly IRepository<Role> _roleService;
         private readonly IRepository<Permission> _permissionService;
-        private readonly IUsersRolesService _usersRolesService;
-        private readonly IUserService _userService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PermissionsService(
             IUsersPermissionsService usersPermissionsService,
-            IRepository<User> user,
-            IRepository<UsersPermissions> usersPermissions,
-            IRepository<UsersRoles> usersRoles,
-            IRepository<Role> roleService,
-            IRepository<Permission> permissionService,
-            IUsersRolesService usersRolesService,
-            IHttpContextAccessor httpContextAccessor)
+            IRepository<Permission> permissionService)
         {
             _usersPermissionsService = usersPermissionsService;
-            _user = user;
-            _usersPermissions = usersPermissions;
-            _usersRoles = usersRoles;
-            _roleService = roleService;
             _permissionService = permissionService;
-            _usersRolesService = usersRolesService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -93,6 +74,11 @@ namespace BRM.BL.PermissionsService
 
             var removedPin = await _permissionService.RemoveAsync(role);
             return removedPin.ToPermissionReturnDto();
+        }
+
+        public async Task<PermissionReturnDto> DeletePermission(DeleteByIdDto dto)
+        {
+            return await DeletePermission(dto.Id);
         }
     }
 }

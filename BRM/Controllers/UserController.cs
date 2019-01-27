@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using BRM.BL.Models.RoleDto;
+using BRM.BL.Models.UserDto;
 using Microsoft.AspNetCore.Mvc;
 using BRM.BL.UserService;
 
@@ -23,6 +24,7 @@ namespace BRM.Controllers
             UserAddDto dto
         )
         {
+            
             try
             {
                 var user = await _userService.GetUser(dto);
@@ -63,6 +65,24 @@ namespace BRM.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new {ex.Message});
+            }
+        }
+
+        [HttpDelete("deleteUser")]
+        public async Task<IActionResult> DeleteUser(
+            DeleteByIdDto dto
+        )
+        {
+            try
+            {
+
+                //var responsePayload = await _userService.AddUser(dto);
+                //return Ok(responsePayload);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
             }
         }
     }

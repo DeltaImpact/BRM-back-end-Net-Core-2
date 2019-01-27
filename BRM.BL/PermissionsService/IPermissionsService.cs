@@ -9,5 +9,7 @@ namespace BRM.BL.PermissionsService
     {
         Task<PermissionReturnDto> AddPermission(PermissionAddDto dto);
         Task<List<PermissionReturnDto>> GetPermissions();
+        Task<PermissionReturnDto> DeletePermission(long permissionId);
+        Task<PermissionReturnDto> DeletePermission(DeleteByIdDto dto);
     }
 }

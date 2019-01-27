@@ -10,6 +10,7 @@ namespace BRM.BL.RolesService
         Task<PermissionReturnDto> AddRole(RoleAddDto roleName);
         Task<List<PermissionReturnDto>> GetRoles();
         Task<PermissionReturnDto> DeleteRole(long roleId);
+        Task<PermissionReturnDto> DeleteRole(DeleteByIdDto dto);
         
     }
 }

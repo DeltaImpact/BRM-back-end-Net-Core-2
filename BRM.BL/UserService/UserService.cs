@@ -7,35 +7,42 @@ using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserDtoExtensions;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
+using BRM.BL.UsersPermissionsService;
+using BRM.BL.UsersRolesService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BRM.BL.UserService
 {
     public class UserService : IUserService
     {
-        private readonly IRepository<UsersRoles> _usersRoles;
-        private readonly IRepository<User> _userService;
-        private readonly IRepository<UsersPermissions> _usersPermissions;
-        private readonly IRepository<Role> _roleService;
-        private readonly IRepository<Permission> _permissionService;
+        private readonly IUsersRolesService _usersRolesService;
+        private readonly IUsersPermissionsService _usersPermissionsService;
+        private readonly IRepository<UsersRoles> _usersRolesRepository;
+        private readonly IRepository<User> _userRepository;
+        private readonly IRepository<UsersPermissions> _usersPermissionsRepository;
+        private readonly IRepository<Role> _roleRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserService(
-            IRepository<User> userService,
-            IRepository<UsersPermissions> usersPermissions,
-            IRepository<UsersRoles> usersRoles,
-            IRepository<Role> roleService,
-            IRepository<Permission> permissionService,
+            IUsersRolesService usersRolesService,
+            IUsersPermissionsService usersPermissionsService,
+            IRepository<User> userRepository,
+            IRepository<UsersPermissions> usersPermissionsRepository,
+            IRepository<UsersRoles> usersRolesRepository,
+            IRepository<Role> roleRepository,
             IHttpContextAccessor httpContextAccessor)
+
         {
-            _usersRoles = usersRoles;
-            _userService = userService;
-            _usersPermissions = usersPermissions;
-            _roleService = roleService;
-            _permissionService = permissionService;
+            _usersRolesService = usersRolesService;
+            _usersPermissionsService = usersPermissionsService;
+            _usersRolesRepository = usersRolesRepository;
+            _userRepository = userRepository;
+            _usersPermissionsRepository = usersPermissionsRepository;
+            _roleRepository = roleRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -47,7 +54,7 @@ namespace BRM.BL.UserService
         public async Task<UserReturnDto> AddUser(string nickname)
         {
             var userInDb =
-                await (await _userService.GetAllAsync(d => d.UserName == nickname))
+                await (await _userRepository.GetAllAsync(d => d.UserName == nickname))
                     .FirstOrDefaultAsync();
             if (userInDb != null)
             {
@@ -60,7 +67,7 @@ namespace BRM.BL.UserService
             };
 
 
-            var user = (await _userService.InsertAsync(userForDb)).ToUserReturnDto();
+            var user = (await _userRepository.InsertAsync(userForDb)).ToUserReturnDto();
 
             return user;
 
@@ -75,7 +82,7 @@ namespace BRM.BL.UserService
         public async Task<UserReturnDto> GetUser(string nickname)
         {
             var userInDb =
-                await (await _userService.GetAllAsync(d => d.UserName == nickname))
+                await (await _userRepository.GetAllAsync(d => d.UserName == nickname))
                     .FirstOrDefaultAsync();
             if (userInDb == null)
             {
@@ -83,12 +90,12 @@ namespace BRM.BL.UserService
             }
 
             var permissions =
-                (await _usersPermissions.GetAllAsync(d => d.User == userInDb, x => x.Permission))
+                (await _usersPermissionsRepository.GetAllAsync(d => d.User == userInDb, x => x.Permission))
                 .Select(e => e.Permission.ToPermissionReturnDto())
                 .ToListAsync();
 
             var roles =
-                (await _usersRoles.GetAllAsync(d => d.User == userInDb, x => x.Role))
+                (await _usersRolesRepository.GetAllAsync(d => d.User == userInDb, x => x.Role))
                 .Select(e => e.Role.ToRoleReturnDto())
                 .ToListAsync();
 
@@ -98,31 +105,36 @@ namespace BRM.BL.UserService
         public async Task<List<UserReturnDto>> GetUsers()
         {
             var users =
-                (await _userService.GetAllAsync())
+                (await _userRepository.GetAllAsync())
                 .Include(e => e.Permissions)
                 .ThenInclude(e => e.Permission)
                 .Include(e => e.Roles)
                 .ThenInclude(e => e.Role)
-                //.Select(e => new
-                //{
-                //    User = e,
-                //    Permissions = e.Permissions.ToList(),
-                //    Roles = e.Roles.ToList(),
-                //    Usr = e.ToUserReturnDto(e.Permissions.ToList(), e.Roles.ToList(),)
-                //})
                 .Select(e => e.ToUserReturnDto(e.Permissions.Select(x => x.Permission.ToPermissionReturnDto()).ToList(),
                     e.Roles.Select(z => z.Role.ToRoleReturnDto()).ToList()))
                 .ToList();
 
-            //var usersForReturning = new List<UserReturnDto>();
-            //foreach (var user in users)
-            //{
-            //    usersForReturning.Add(user.User.ToUserReturnDto(user.Permissions.Select(e => e.Permission).ToList(),
-            //        user.Roles.Select(e => e.UserRole).ToList()));
-            //}
-
             return users;
-            //throw new NotImplementedException();
+        }
+
+        public async Task DeleteUser(DeleteByIdDto dto)
+        {
+            await DeleteUser(dto.Id);
+        }
+
+        public async Task DeleteUser(long userId)
+        {
+            var user =
+                await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new ObjectNotFoundException("User not found.");
+            }
+
+            await _usersRolesService.DeleteAllRoleFromUser(user.Id);
+            await _usersPermissionsService.DeleteAllPermissionFromUser(user.Id);
+            await _userRepository.RemoveAsync(user);
         }
     }
 }
