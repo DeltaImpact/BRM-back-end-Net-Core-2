@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.RoleDtoExtensions;
+using BRM.BL.Models;
 using BRM.BL.Models.PermissionDto;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.UsersRolesService;
 using BRM.BL.UserService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace BRM.BL.RolesService
@@ -19,17 +21,20 @@ namespace BRM.BL.RolesService
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Role> _roleRepository;
         private readonly IUsersRolesService _usersRolesService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RolesService(
             IRepository<User> userRepository,
             IRepository<UsersRoles> usersRolesRepository,
             IRepository<Role> roleRepository,
-            IUsersRolesService usersRolesService)
+            IUsersRolesService usersRolesService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _usersRolesRepository = usersRolesRepository;
             _roleRepository = roleRepository;
             _usersRolesService = usersRolesService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<PermissionReturnDto> AddRole(RoleAddDto dto)
@@ -67,6 +72,20 @@ namespace BRM.BL.RolesService
         public async Task<PermissionReturnDto> DeleteRole(DeleteByIdDto dto)
         {
             return await DeleteRole(dto.Id);
+        }
+
+        public async Task<PermissionReturnDto> UpdateRoleAsync(RoleUpdateDto model)
+        {
+            var permissionOld =
+                await _roleRepository.GetByIdAsync(model.Id);
+            if (permissionOld == null)
+            {
+                throw new ObjectNotFoundException("Role not found.");
+            }
+
+            var permission =
+                await _roleRepository.UpdateAsync(model.ToRole());
+            return permission.ToRoleReturnDto();
         }
 
         public async Task<PermissionReturnDto> DeleteRole(long roleId)

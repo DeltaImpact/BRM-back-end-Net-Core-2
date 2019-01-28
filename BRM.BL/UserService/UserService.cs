@@ -5,6 +5,8 @@ using BRM.BL.Exceptions;
 using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserDtoExtensions;
+using BRM.BL.Models;
+using BRM.BL.Models.PermissionDto;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.BL.UsersPermissionsService;
@@ -14,6 +16,7 @@ using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
 
 namespace BRM.BL.UserService
 {
@@ -48,7 +51,7 @@ namespace BRM.BL.UserService
 
         public Task<UserReturnDto> AddUser(UserAddDto dto)
         {
-            return AddUser(dto.username);
+            return AddUser(dto.Username);
         }
 
         public async Task<UserReturnDto> AddUser(string nickname)
@@ -76,7 +79,7 @@ namespace BRM.BL.UserService
 
         public Task<UserReturnDto> GetUser(UserAddDto dto)
         {
-            return GetUser(dto.username);
+            return GetUser(dto.Username);
         }
 
         public async Task<UserReturnDto> GetUser(string nickname)
@@ -132,9 +135,30 @@ namespace BRM.BL.UserService
                 throw new ObjectNotFoundException("User not found.");
             }
 
+
             await _usersRolesService.DeleteAllRoleFromUser(user.Id);
             await _usersPermissionsService.DeleteAllPermissionFromUser(user.Id);
+
             await _userRepository.RemoveAsync(user);
+
+        }
+
+        public async Task<UserReturnDto> UpdateUserAsync(UserUpdateDto model)
+        {
+            var userOld =
+                await _userRepository.GetByIdAsync(model.Id);
+            if (userOld == null)
+            {
+                throw new ObjectNotFoundException("User not found.");
+            }
+
+            if ((await _userRepository.GetAllAsync(x => x.UserName == model.Name)).Any()) throw new ObjectNotFoundException("User with same nickname already exist.");
+
+            userOld.UserName = model.Name;
+
+            var user =
+                await _userRepository.UpdateAsync(userOld);
+            return user.ToUserReturnDto();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using BRM.BL.Exceptions;
+using BRM.BL.Extensions.UserDtoExtensions;
 using BRM.BL.Extensions.UserPermissionExtensions;
+using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserPermissionDto;
@@ -15,26 +17,32 @@ namespace BRM.BL.UsersPermissionsService
 {
     public class UsersPermissionsService : IUsersPermissionsService
     {
-        private readonly IUserService _userService;
+        public IRepository<UsersPermissions> UsersPermissionsRepository { get; }
+        public IRepository<UsersRoles> UsersRolesRepository { get; }
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<UsersPermissions> _usersPermissions;
         private readonly IRepository<Permission> _permissionService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsersPermissionsService(
-            IUserService userService,
             IRepository<User> userRepository,
             IRepository<UsersPermissions> usersPermissions,
-            IRepository<Permission> permissionService
+            IRepository<Permission> permissionService,
+            IHttpContextAccessor httpContextAccessor,
+            IRepository<UsersPermissions> usersPermissionsRepository,
+            IRepository<UsersRoles> usersRolesRepository
         )
         {
-            _userService = userService;
+            UsersPermissionsRepository = usersPermissionsRepository;
+            UsersRolesRepository = usersRolesRepository;
             _userRepository = userRepository;
             _usersPermissions = usersPermissions;
 
             _permissionService = permissionService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserReturnDto> AddPermissionToUser(long userId, long permissionId)
+        public async Task<UserPermissionReturnDto> AddPermissionToUser(long userId, long permissionId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -58,7 +66,7 @@ namespace BRM.BL.UsersPermissionsService
 
             if (userToRoleConnection != null)
             {
-                throw new ObjectNotFoundException("User already have role.");
+                throw new ObjectNotFoundException("User already have permission.");
             }
 
             var userToRoleForDb = new UsersPermissions
@@ -68,11 +76,11 @@ namespace BRM.BL.UsersPermissionsService
             };
 
             var connection = (await _usersPermissions.InsertAsync(userToRoleForDb));
-
-            return await _userService.GetUser(connection.User.UserName);
+            return connection.ToUserPermissionReturnDto();
+            //return await _userService.GetUser(connection.User.UserName);
         }
 
-        public async Task<UserReturnDto> DeletePermissionFromUser(long userId, long permissionId)
+        public async Task DeletePermissionFromUser(long userId, long permissionId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -92,15 +100,16 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var removedPermission = await _usersPermissions.RemoveAsync(userToPermissionConnection);
-            return await _userService.GetUser(removedPermission.User.UserName);
+            //return removedPermission.ToUserPermissionReturnDto();
+            //return await _userService.GetUser(removedPermission.User.UserName);
         }
 
-        public Task<UserReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto)
+        public Task<UserPermissionReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto)
         {
             return AddPermissionToUser(dto.UserId, dto.RoleOrPermissionId);
         }
 
-        public Task<UserReturnDto> DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto)
+        public Task DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto)
         {
             return DeletePermissionFromUser(dto.UserId, dto.RoleOrPermissionId);
         }
@@ -152,5 +161,6 @@ namespace BRM.BL.UsersPermissionsService
         {
             await DeleteAllPermissionFromUser(dto.Id);
         }
+
     }
 }

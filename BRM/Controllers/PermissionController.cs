@@ -1,9 +1,13 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models;
+using BRM.BL.Models.PermissionDto;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.BL.PermissionsService;
 using BRM.BL.UsersPermissionsService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BRM.Controllers
@@ -53,6 +57,23 @@ namespace BRM.Controllers
         }
 
 
+        [HttpPut("updatePermission")]
+        public async Task<IActionResult> UpdatePermission(
+            PermissionUpdateDto model
+        )
+        {
+            try
+            {
+                var responsePayload = await _permissionsService.UpdatePermissionAsync(model);
+                return Ok(responsePayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+        }
+
+
         [HttpPost("addPermissionToUser")]
         public async Task<IActionResult> AddPermissionToUser(
             UserRoleOrPermissionUpdateDto dto
@@ -76,8 +97,8 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _usersPermissionsService.DeletePermissionFromUser(dto);
-                return Ok(responsePayload);
+                await _usersPermissionsService.DeletePermissionFromUser(dto);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -86,14 +107,14 @@ namespace BRM.Controllers
         }
 
 
-        [HttpPost("deletePermission")]
+        [HttpDelete("deletePermission")]
         public async Task<IActionResult> RemovePermission(
-            [FromBody] DeleteByIdDto dto
+            [Required] int id
         )
         {
             try
             {
-                var responsePayload = await _permissionsService.DeletePermission(dto);
+                var responsePayload = await _permissionsService.DeletePermission(id);
                 return Ok(responsePayload);
             }
             catch (Exception ex)

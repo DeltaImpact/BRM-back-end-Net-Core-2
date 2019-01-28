@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BRM.BL.Exceptions;
+using BRM.BL.Extensions.UserRoleExtensions;
+using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserRoleDto;
@@ -13,25 +15,24 @@ namespace BRM.BL.UsersRolesService
 {
     public class UsersRolesService : IUsersRolesService
     {
-        public IUserService UserService { get; }
         private readonly IRepository<UsersRoles> _usersRoles;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Role> _roleService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsersRolesService(
-            IUserService userService,
             IRepository<User> userRepository,
             IRepository<UsersRoles> usersRoles,
-            IRepository<Role> roleService)
+            IRepository<Role> roleService, IHttpContextAccessor httpContextAccessor)
         {
-            UserService = userService;
             _userRepository = userRepository;
             _usersRoles = usersRoles;
             _userRepository = userRepository;
             _roleService = roleService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserReturnDto> AddRoleToUser(UserRoleOrPermissionUpdateDto dto)
+        public async Task<UserRoleReturnDto> AddRoleToUser(UserRoleOrPermissionUpdateDto dto)
         {
             var user =
                 await _userRepository.GetByIdAsync(dto.UserId);
@@ -65,11 +66,11 @@ namespace BRM.BL.UsersRolesService
             };
 
             var connection = (await _usersRoles.InsertAsync(userToRoleForDb));
-
-            return await UserService.GetUser(connection.User.UserName);
+            return connection.ToUserRoleReturnDto();
+            //return await UserService.GetUser(connection.User.UserName);
         }
 
-        public async Task<UserReturnDto> DeleteRoleFromUser(UserRoleOrPermissionUpdateDto dto)
+        public async Task DeleteRoleFromUser(UserRoleOrPermissionUpdateDto dto)
         {
             var user =
                 await _userRepository.GetByIdAsync(dto.UserId);
@@ -88,9 +89,8 @@ namespace BRM.BL.UsersRolesService
                 throw new ObjectNotFoundException("User role not found.");
             }
 
-            var removedRole = await _usersRoles.RemoveAsync(userToRoleConnection);
-
-            return await UserService.GetUser(removedRole.User.UserName);
+            await _usersRoles.RemoveAsync(userToRoleConnection);
+            //return await UserService.GetUser(removedRole.User.UserName);
         }
 
         public async Task DeleteAllRoleConnections(long roleId)

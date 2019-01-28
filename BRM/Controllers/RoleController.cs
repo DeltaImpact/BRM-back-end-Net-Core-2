@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.BL.RolesService;
@@ -75,8 +77,8 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _usersRolesService.DeleteRoleFromUser(dto);
-                return Ok(responsePayload);
+                await _usersRolesService.DeleteRoleFromUser(dto);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -85,19 +87,35 @@ namespace BRM.Controllers
         }
 
 
-        [HttpPost("deleteRole")]
+        [HttpDelete("deleteRole")]
         public async Task<IActionResult> RemoveRole(
-            DeleteByIdDto dto
+            [Required] int id
         )
         {
             try
             {
-                var responsePayload = await _rolesService.DeleteRole(dto);
+                var responsePayload = await _rolesService.DeleteRole(id);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
             {
                 return BadRequest(new {ex.Message});
+            }
+        }
+
+        [HttpPut("updateRole")]
+        public async Task<IActionResult> UpdateRole(
+            RoleUpdateDto dto
+        )
+        {
+            try
+            {
+                var responsePayload = await _rolesService.UpdateRoleAsync(dto);
+                return Ok(responsePayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
             }
         }
     }

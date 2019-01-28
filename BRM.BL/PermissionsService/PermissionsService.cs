@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.RoleDtoExtensions;
+using BRM.BL.Models;
 using BRM.BL.Models.PermissionDto;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.UsersPermissionsService;
@@ -20,20 +21,22 @@ namespace BRM.BL.PermissionsService
     {
         private readonly IUsersPermissionsService _usersPermissionsService;
         private readonly IRepository<Permission> _permissionService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PermissionsService(
             IUsersPermissionsService usersPermissionsService,
-            IRepository<Permission> permissionService)
+            IRepository<Permission> permissionService, IHttpContextAccessor httpContextAccessor)
         {
             _usersPermissionsService = usersPermissionsService;
             _permissionService = permissionService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
         public async Task<PermissionReturnDto> AddPermission(PermissionAddDto dto)
         {
             var roleInDb =
-                await (await _permissionService.GetAllAsync(d => d.Name == dto.permissionName))
+                await (await _permissionService.GetAllAsync(d => d.Name == dto.PermissionName))
                     .FirstOrDefaultAsync();
             if (roleInDb != null)
             {
@@ -42,7 +45,7 @@ namespace BRM.BL.PermissionsService
 
             var userForDb = new Permission
             {
-                Name = dto.permissionName,
+                Name = dto.PermissionName,
             };
 
             var user = (await _permissionService.InsertAsync(userForDb));
@@ -79,6 +82,20 @@ namespace BRM.BL.PermissionsService
         public async Task<PermissionReturnDto> DeletePermission(DeleteByIdDto dto)
         {
             return await DeletePermission(dto.Id);
+        }
+
+        public async Task<PermissionReturnDto> UpdatePermissionAsync(PermissionUpdateDto model)
+        {
+            var permissionOld =
+                await _permissionService.GetByIdAsync(model.Id);
+            if (permissionOld == null)
+            {
+                throw new ObjectNotFoundException("Permission not found.");
+            }
+
+            var permission =
+                await _permissionService.UpdateAsync(model.ToPermission());
+            return permission.ToPermissionReturnDto();
         }
     }
 }

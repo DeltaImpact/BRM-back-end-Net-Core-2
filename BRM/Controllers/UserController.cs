@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using Microsoft.AspNetCore.Mvc;
 using BRM.BL.UserService;
+using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
 
 namespace BRM.Controllers
 {
@@ -70,15 +72,32 @@ namespace BRM.Controllers
 
         [HttpDelete("deleteUser")]
         public async Task<IActionResult> DeleteUser(
-            DeleteByIdDto dto
+            [Required] int id
         )
         {
             try
             {
 
-                //var responsePayload = await _userService.AddUser(dto);
-                //return Ok(responsePayload);
+                await _userService.DeleteUser(id);
                 return Ok();
+                //return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+        }
+
+
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateRole(
+            UserUpdateDto dto
+        )
+        {
+            try
+            {
+                var responsePayload = await _userService.UpdateUserAsync(dto);
+                return Ok(responsePayload);
             }
             catch (Exception ex)
             {
