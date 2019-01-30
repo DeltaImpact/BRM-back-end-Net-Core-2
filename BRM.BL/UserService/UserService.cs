@@ -6,15 +6,12 @@ using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserDtoExtensions;
 using BRM.BL.Models;
-using BRM.BL.Models.PermissionDto;
-using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using BRM.BL.UsersPermissionsService;
 using BRM.BL.UsersRolesService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
 

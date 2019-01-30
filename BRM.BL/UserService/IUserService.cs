@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using BRM.BL.Models;
-using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserDto;
 using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
 

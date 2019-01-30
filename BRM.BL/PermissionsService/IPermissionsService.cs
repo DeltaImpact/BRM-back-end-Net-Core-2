@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using BRM.BL.Models;
 using BRM.BL.Models.PermissionDto;
-using BRM.BL.Models.RoleDto;
 
 namespace BRM.BL.PermissionsService
 {

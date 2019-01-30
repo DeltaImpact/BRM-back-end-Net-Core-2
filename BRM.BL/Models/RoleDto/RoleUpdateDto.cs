@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using BRM.DAO.Entities;
-
-namespace BRM.BL.Models.RoleDto
+﻿namespace BRM.BL.Models.RoleDto
 {
     public class RoleUpdateDto
     {

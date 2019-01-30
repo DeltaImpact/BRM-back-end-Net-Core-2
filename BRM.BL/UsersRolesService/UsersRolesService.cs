@@ -2,10 +2,7 @@
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.UserRoleExtensions;
 using BRM.BL.Models;
-using BRM.BL.Models.RoleDto;
-using BRM.BL.Models.UserDto;
 using BRM.BL.Models.UserRoleDto;
-using BRM.BL.UserService;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;

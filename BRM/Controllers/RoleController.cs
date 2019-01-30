@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.BL.RolesService;
