@@ -35,7 +35,7 @@ namespace BRM.BL.RolesService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<PermissionReturnDto> AddRole(RoleAddDto dto)
+        public async Task<RoleReturnDto> AddRole(RoleAddDto dto)
         {
             var roleInDb =
                 await (await _roleRepository.GetAllAsync(d => d.Name == dto.RoleName))
@@ -57,7 +57,7 @@ namespace BRM.BL.RolesService
             //throw new NotImplementedException();
         }
 
-        public async Task<List<PermissionReturnDto>> GetRoles()
+        public async Task<List<RoleReturnDto>> GetRoles()
         {
             var roles =
                 (await _roleRepository.GetAllAsync())
@@ -67,12 +67,12 @@ namespace BRM.BL.RolesService
             return roles;
         }
 
-        public async Task<PermissionReturnDto> DeleteRole(DeleteByIdDto dto)
+        public async Task<RoleReturnDto> DeleteRole(DeleteByIdDto dto)
         {
             return await DeleteRole(dto.Id);
         }
 
-        public async Task<PermissionReturnDto> UpdateRoleAsync(RoleUpdateDto model)
+        public async Task<RoleReturnDto> UpdateRoleAsync(RoleUpdateDto model)
         {
             var permissionOld =
                 await _roleRepository.GetByIdAsync(model.Id);
@@ -86,7 +86,7 @@ namespace BRM.BL.RolesService
             return permission.ToRoleReturnDto();
         }
 
-        public async Task<PermissionReturnDto> DeleteRole(long roleId)
+        public async Task<RoleReturnDto> DeleteRole(long roleId)
         {
             var role =
                 await _roleRepository.GetByIdAsync(roleId);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.RoleDto;
 
 namespace BRM.BL.Models.UserDto
 {
@@ -8,6 +9,6 @@ namespace BRM.BL.Models.UserDto
         public string UserName { get; set; }
         public long Id { get; set; }
         public List<PermissionReturnDto> Permissions { get; set; }
-        public List<PermissionReturnDto> Roles { get; set; }
+        public List<RoleReturnDto> Roles { get; set; }
     }
 }
