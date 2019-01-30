@@ -31,8 +31,13 @@ namespace BRM.BL.UsersRolesService
 
         public async Task<UserRoleReturnDto> AddRoleToUser(UserRoleOrPermissionUpdateDto dto)
         {
+            return await AddRoleToUser(dto.UserId, dto.RoleOrPermissionId);
+        }
+
+        public async Task<UserRoleReturnDto> AddRoleToUser(long userId, long roleOrPermissionId)
+        {
             var user =
-                await _userRepository.GetByIdAsync(dto.UserId);
+                await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
@@ -40,7 +45,7 @@ namespace BRM.BL.UsersRolesService
             }
 
             var role =
-                await _roleService.GetByIdAsync(dto.RoleOrPermissionId);
+                await _roleService.GetByIdAsync(roleOrPermissionId);
 
             if (role == null)
             {

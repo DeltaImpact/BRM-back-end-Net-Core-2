@@ -11,6 +11,7 @@ namespace BRM.BL.UserService
         Task<UserReturnDto> AddUser(UserAddDto dto);
         Task<UserReturnDto> AddUser(string nickname);
         Task<UserReturnDto> GetUser(UserAddDto dto);
+        Task<UserReturnDto> GetUserById(long id);
         Task<UserReturnDto> GetUser(string nickname);
         Task<List<UserReturnDto>> GetUsers();
         Task DeleteUser(long userId);

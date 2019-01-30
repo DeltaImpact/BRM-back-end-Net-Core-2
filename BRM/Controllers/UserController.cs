@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
-using BRM.BL.Models;
-using BRM.BL.Models.RoleDto;
+using System.Transactions;
 using BRM.BL.Models.UserDto;
+using BRM.BL.UsersPermissionsService;
+using BRM.BL.UsersRolesService;
 using Microsoft.AspNetCore.Mvc;
 using BRM.BL.UserService;
 using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
@@ -15,10 +17,15 @@ namespace BRM.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IUsersRolesService _usersRolesService;
+        private readonly IUsersPermissionsService _usersPermissionsService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IUsersRolesService usersRolesService,
+            IUsersPermissionsService usersPermissionsService)
         {
             _userService = userService;
+            _usersRolesService = usersRolesService;
+            _usersPermissionsService = usersPermissionsService;
         }
 
         [HttpGet("user")]
@@ -26,7 +33,6 @@ namespace BRM.Controllers
             UserAddDto dto
         )
         {
-            
             try
             {
                 var user = await _userService.GetUser(dto);
@@ -61,8 +67,28 @@ namespace BRM.Controllers
             try
             {
                 var responsePayload = await _userService.AddUser(dto);
-                return Ok(responsePayload);
-                //return Ok();
+
+                if (dto.RolesId.Count == 0 && dto.PermissionsId.Count == 0)
+                    return Ok(responsePayload);
+
+                foreach (var roleId in dto.RolesId)
+                {
+                    await _usersRolesService.AddRoleToUser(responsePayload.Id, roleId);
+                }
+                foreach (var permissionsId in dto.PermissionsId)
+                {
+                    await _usersPermissionsService.AddPermissionToUser(responsePayload.Id, permissionsId);
+                }
+                
+                //var rolesTasks = dto.RolesId.Select(o => _usersRolesService.AddRoleToUser(responsePayload.Id, o))
+                //    .ToArray();
+                //var permissionsTasks = dto.PermissionsId
+                //    .Select(o => _usersPermissionsService.AddPermissionToUser(responsePayload.Id, o)).ToArray();
+
+                //await Task.WhenAll(rolesTasks);
+                //await Task.WhenAll(permissionsTasks);
+                var user = await _userService.GetUserById(responsePayload.Id);
+                return Ok(user);
             }
             catch (Exception ex)
             {
@@ -77,14 +103,13 @@ namespace BRM.Controllers
         {
             try
             {
-
                 await _userService.DeleteUser(id);
                 return Ok();
                 //return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return BadRequest(new {ex.Message});
             }
         }
 
@@ -101,7 +126,7 @@ namespace BRM.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return BadRequest(new {ex.Message});
             }
         }
     }

@@ -79,6 +79,28 @@ namespace BRM.BL.UserService
             return GetUser(dto.Username);
         }
 
+        public async Task<UserReturnDto> GetUserById(long id)
+        {
+            var userInDb =
+                await _userRepository.GetByIdAsync(id);
+            if (userInDb == null)
+            {
+                throw new ObjectAlreadyExistException("User with such name not exist.");
+            }
+
+            var permissions =
+                (await _usersPermissionsRepository.GetAllAsync(d => d.User == userInDb, x => x.Permission))
+                .Select(e => e.Permission.ToPermissionReturnDto())
+                .ToListAsync();
+
+            var roles =
+                (await _usersRolesRepository.GetAllAsync(d => d.User == userInDb, x => x.Role))
+                .Select(e => e.Role.ToRoleReturnDto())
+                .ToListAsync();
+
+            return userInDb.ToUserReturnDto(await permissions, await roles);
+        }
+
         public async Task<UserReturnDto> GetUser(string nickname)
         {
             var userInDb =
@@ -137,7 +159,6 @@ namespace BRM.BL.UserService
             await _usersPermissionsService.DeleteAllPermissionFromUser(user.Id);
 
             await _userRepository.RemoveAsync(user);
-
         }
 
         public async Task<UserReturnDto> UpdateUserAsync(UserUpdateDto model)
@@ -149,7 +170,8 @@ namespace BRM.BL.UserService
                 throw new ObjectNotFoundException("User not found.");
             }
 
-            if ((await _userRepository.GetAllAsync(x => x.UserName == model.Name)).Any()) throw new ObjectNotFoundException("User with same nickname already exist.");
+            if ((await _userRepository.GetAllAsync(x => x.UserName == model.Name)).Any())
+                throw new ObjectNotFoundException("User with same nickname already exist.");
 
             userOld.UserName = model.Name;
 
