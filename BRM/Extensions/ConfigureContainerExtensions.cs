@@ -17,13 +17,13 @@ namespace BRM.Extensions
             serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
-        public static void AddScopedServices(this IServiceCollection serviceCollection)
+        public static void AddTransientServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IUserService, UserService>();
-            serviceCollection.AddScoped<IRolesService, RolesService>();
-            serviceCollection.AddScoped<IPermissionsService, PermissionsService>();
-            serviceCollection.AddScoped<IUsersPermissionsService, UsersPermissionsService>();
-            serviceCollection.AddScoped<IUsersRolesService, UsersRolesService>();
+            serviceCollection.AddTransient<IUserService, UserService>();
+            serviceCollection.AddTransient<IRolesService, RolesService>();
+            serviceCollection.AddTransient<IPermissionsService, PermissionsService>();
+            serviceCollection.AddTransient<IUsersPermissionsService, UsersPermissionsService>();
+            serviceCollection.AddTransient<IUsersRolesService, UsersRolesService>();
         }
     }
 }

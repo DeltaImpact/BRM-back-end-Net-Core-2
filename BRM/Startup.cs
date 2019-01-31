@@ -33,7 +33,7 @@ namespace BRM
                 }));
             services.AddSignalR();
             services.AddRepository();
-            services.AddScopedServices();
+            services.AddTransientServices();
             services.AddHttpContextAccessor();
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
