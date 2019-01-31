@@ -38,6 +38,33 @@ namespace BRM.BL.UsersRolesService
             return await AddRoleToUser(dto.UserId, dto.RoleOrPermissionId);
         }
 
+        public async Task<List<UserRoleReturnDto>> AddRolesToUser(long userId, ICollection<long> rolesId)
+        {
+            var user =
+                await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ObjectNotFoundException("User not found.");
+            }
+
+            var roles = await _roleRepository.GetAllAsync(o => rolesId.Contains(o.Id));
+            foreach (var role in roles)
+            {
+                if (!rolesId.Contains(role.Id)) throw new ObjectNotFoundException("Role not found.");
+            }
+
+            var rolesToInsert = roles.Select(role =>
+                new UsersRoles
+                {
+                    Role = role,
+                    User = user
+                }).ToArray();
+
+            var connections = (await _usersRolesRepository.InsertManyAsync(rolesToInsert)).Select(o => o.ToUserRoleReturnDto()).ToList();
+            return connections;
+        }
+
+
         public async Task<UserRoleReturnDto> AddRoleToUser(long userId, long roleOrPermissionId)
         {
             var user =

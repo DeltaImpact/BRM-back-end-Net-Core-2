@@ -73,9 +73,36 @@ namespace BRM.BL.UsersPermissionsService
                 Permission = permission
             };
 
-            var connection = (await _usersPermissions.InsertAsync(userToRoleForDb));
+            var connection = (await _usersPermissionsRepository.InsertAsync(userToRoleForDb));
+            connection.User = user;
+            connection.Permission = permission;
             return connection.ToUserPermissionReturnDto();
-            //return await _userService.GetUser(connection.User.UserName);
+        }
+
+        public async Task<List<UserPermissionReturnDto>> AddPermissionsToUser(long userId, ICollection<long> permissionsId)
+        {
+            var user =
+                await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ObjectNotFoundException("User not found.");
+            }
+
+            var roles = await _permissionRepository.GetAllAsync(o => permissionsId.Contains(o.Id));
+            foreach (var role in roles)
+            {
+                if (!permissionsId.Contains(role.Id)) throw new ObjectNotFoundException("Permission not found.");
+            }
+
+            var toInsert = roles.Select(permission =>
+                new UsersPermissions()
+                {
+                    Permission = permission,
+                    User = user
+                }).ToArray();
+
+            var connections = (await _usersPermissionsRepository.InsertManyAsync(toInsert)).Select(o => o.ToUserPermissionReturnDto()).ToList();
+            return connections;
         }
 
         public async Task DeletePermissionFromUser(long userId, long permissionId)

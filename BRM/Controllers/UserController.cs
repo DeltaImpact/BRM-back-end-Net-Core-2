@@ -66,29 +66,16 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _userService.AddUser(dto);
+                var newUser = await _userService.AddUser(dto);
 
                 if (dto.RolesId.Count == 0 && dto.PermissionsId.Count == 0)
-                    return Ok(responsePayload);
+                    return Ok(newUser);
 
-                foreach (var roleId in dto.RolesId)
-                {
-                    await _usersRolesService.AddRoleToUser(responsePayload.Id, roleId);
-                }
-                foreach (var permissionsId in dto.PermissionsId)
-                {
-                    await _usersPermissionsService.AddPermissionToUser(responsePayload.Id, permissionsId);
-                }
-                
-                //var rolesTasks = dto.RolesId.Select(o => _usersRolesService.AddRoleToUser(responsePayload.Id, o))
-                //    .ToArray();
-                //var permissionsTasks = dto.PermissionsId
-                //    .Select(o => _usersPermissionsService.AddPermissionToUser(responsePayload.Id, o)).ToArray();
-
-                //await Task.WhenAll(rolesTasks);
-                //await Task.WhenAll(permissionsTasks);
-                var user = await _userService.GetUserById(responsePayload.Id);
-                return Ok(user);
+                var roles = await _usersRolesService.AddRolesToUser(newUser.Id, dto.RolesId);
+                var permissions = await _usersPermissionsService.AddPermissionsToUser(newUser.Id, dto.PermissionsId);
+                newUser.Roles = roles.Select(o => o.Role).ToList();
+                newUser.Permissions = permissions.Select(o => o.Permission).ToList();
+                return Ok(newUser);
             }
             catch (Exception ex)
             {
