@@ -1,31 +1,35 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.UserRoleExtensions;
 using BRM.BL.Models;
+using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.DAO.Entities;
 using BRM.DAO.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.ResponseCaching.Internal;
 using Microsoft.EntityFrameworkCore;
 
 namespace BRM.BL.UsersRolesService
 {
     public class UsersRolesService : IUsersRolesService
     {
-        private readonly IRepository<UsersRoles> _usersRoles;
+        private readonly IRepository<UsersRoles> _usersRolesRepository;
         private readonly IRepository<User> _userRepository;
-        private readonly IRepository<Role> _roleService;
+        private readonly IRepository<Role> _roleRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsersRolesService(
             IRepository<User> userRepository,
-            IRepository<UsersRoles> usersRoles,
-            IRepository<Role> roleService, IHttpContextAccessor httpContextAccessor)
+            IRepository<UsersRoles> usersRolesRepository,
+            IRepository<Role> roleRepository, IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
-            _usersRoles = usersRoles;
+            _usersRolesRepository = usersRolesRepository;
             _userRepository = userRepository;
-            _roleService = roleService;
+            _roleRepository = roleRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -45,7 +49,7 @@ namespace BRM.BL.UsersRolesService
             }
 
             var role =
-                await _roleService.GetByIdAsync(roleOrPermissionId);
+                await _roleRepository.GetByIdAsync(roleOrPermissionId);
 
             if (role == null)
             {
@@ -53,7 +57,7 @@ namespace BRM.BL.UsersRolesService
             }
 
             var userToRoleConnection =
-                await (await _usersRoles.GetAllAsync(d => d.User == user && d.Role == role))
+                await (await _usersRolesRepository.GetAllAsync(d => d.User == user && d.Role == role))
                     .FirstOrDefaultAsync();
 
             if (userToRoleConnection != null)
@@ -67,7 +71,9 @@ namespace BRM.BL.UsersRolesService
                 Role = role
             };
 
-            var connection = (await _usersRoles.InsertAsync(userToRoleForDb));
+            var connection = (await _usersRolesRepository.InsertAsync(userToRoleForDb));
+            connection.Role = role;
+            connection.User = user;
             return connection.ToUserRoleReturnDto();
             //return await UserService.GetUser(connection.User.UserName);
         }
@@ -83,7 +89,8 @@ namespace BRM.BL.UsersRolesService
             }
 
             var userToRoleConnection =
-                await (await _usersRoles.GetAllAsync(d => d.User == user && d.Role.Id == dto.RoleOrPermissionId))
+                await (await _usersRolesRepository.GetAllAsync(d =>
+                        d.User == user && d.Role.Id == dto.RoleOrPermissionId))
                     .FirstOrDefaultAsync();
 
             if (userToRoleConnection == null)
@@ -91,14 +98,14 @@ namespace BRM.BL.UsersRolesService
                 throw new ObjectNotFoundException("User role not found.");
             }
 
-            await _usersRoles.RemoveAsync(userToRoleConnection);
+            await _usersRolesRepository.RemoveAsync(userToRoleConnection);
             //return await UserService.GetUser(removedRole.User.UserName);
         }
 
         public async Task DeleteAllRoleConnections(long roleId)
         {
             var role =
-                await _roleService.GetByIdAsync(roleId);
+                await _roleRepository.GetByIdAsync(roleId);
 
             if (role == null)
             {
@@ -106,11 +113,11 @@ namespace BRM.BL.UsersRolesService
             }
 
             var allRoleConnections =
-                await (await _usersRoles.GetAllAsync(d => d.Role == role)).ToListAsync();
+                await (await _usersRolesRepository.GetAllAsync(d => d.Role == role)).ToListAsync();
 
             foreach (var roleConnection in allRoleConnections)
             {
-                await _usersRoles.RemoveAsync(roleConnection);
+                await _usersRolesRepository.RemoveAsync(roleConnection);
             }
         }
 
@@ -125,11 +132,11 @@ namespace BRM.BL.UsersRolesService
             }
 
             var allPermissionToUserConnections =
-                await(await _usersRoles.GetAllAsync(d => d.User.Id == userId)).ToListAsync();
+                await (await _usersRolesRepository.GetAllAsync(d => d.User.Id == userId)).ToListAsync();
 
             foreach (var userConnection in allPermissionToUserConnections)
             {
-                await _usersRoles.RemoveAsync(userConnection);
+                await _usersRolesRepository.RemoveAsync(userConnection);
             }
         }
 

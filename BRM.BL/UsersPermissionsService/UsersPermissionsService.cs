@@ -1,7 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using BRM.BL.Exceptions;
 using BRM.BL.Extensions.UserPermissionExtensions;
 using BRM.BL.Models;
+using BRM.BL.Models.PermissionDto;
+using BRM.BL.Models.RoleDto;
 using BRM.BL.Models.UserPermissionDto;
 using BRM.BL.Models.UserRoleDto;
 using BRM.DAO.Entities;
@@ -16,25 +20,23 @@ namespace BRM.BL.UsersPermissionsService
         public IRepository<UsersPermissions> UsersPermissionsRepository { get; }
         public IRepository<UsersRoles> UsersRolesRepository { get; }
         private readonly IRepository<User> _userRepository;
-        private readonly IRepository<UsersPermissions> _usersPermissions;
-        private readonly IRepository<Permission> _permissionService;
+        private readonly IRepository<UsersPermissions> _usersPermissionsRepository;
+        private readonly IRepository<Permission> _permissionRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsersPermissionsService(
             IRepository<User> userRepository,
-            IRepository<UsersPermissions> usersPermissions,
-            IRepository<Permission> permissionService,
+            IRepository<Permission> permissionRepository,
             IHttpContextAccessor httpContextAccessor,
             IRepository<UsersPermissions> usersPermissionsRepository,
             IRepository<UsersRoles> usersRolesRepository
         )
         {
-            UsersPermissionsRepository = usersPermissionsRepository;
             UsersRolesRepository = usersRolesRepository;
             _userRepository = userRepository;
-            _usersPermissions = usersPermissions;
+            _usersPermissionsRepository = usersPermissionsRepository;
 
-            _permissionService = permissionService;
+            _permissionRepository = permissionRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -49,7 +51,7 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var permission =
-                await _permissionService.GetByIdAsync(permissionId);
+                await _permissionRepository.GetByIdAsync(permissionId);
 
             if (permission == null)
             {
@@ -57,7 +59,7 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var userToRoleConnection =
-                await (await _usersPermissions.GetAllAsync(d => d.User == user && d.Permission == permission))
+                await (await _usersPermissionsRepository.GetAllAsync(d => d.User == user && d.Permission == permission))
                     .FirstOrDefaultAsync();
 
             if (userToRoleConnection != null)
@@ -87,7 +89,8 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var userToPermissionConnection =
-                await (await _usersPermissions.GetAllAsync(d => d.User == user && d.Permission.Id == permissionId, i => i.User))
+                await (await _usersPermissionsRepository.GetAllAsync(d => d.User == user && d.Permission.Id == permissionId,
+                        i => i.User))
                     .FirstOrDefaultAsync();
 
             if (userToPermissionConnection == null)
@@ -95,7 +98,7 @@ namespace BRM.BL.UsersPermissionsService
                 throw new ObjectNotFoundException("User permission not found.");
             }
 
-            var removedPermission = await _usersPermissions.RemoveAsync(userToPermissionConnection);
+            var removedPermission = await _usersPermissionsRepository.RemoveAsync(userToPermissionConnection);
             //return removedPermission.ToUserPermissionReturnDto();
             //return await _userService.GetUser(removedPermission.User.UserName);
         }
@@ -113,7 +116,7 @@ namespace BRM.BL.UsersPermissionsService
         public async Task DeleteAllPermissionConnections(long permissionId)
         {
             var permissions =
-                await _permissionService.GetByIdAsync(permissionId);
+                await _permissionRepository.GetByIdAsync(permissionId);
 
             if (permissions == null)
             {
@@ -121,11 +124,11 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var allRoleConnections =
-                await (await _usersPermissions.GetAllAsync(d => d.Permission == permissions)).ToListAsync();
+                await (await _usersPermissionsRepository.GetAllAsync(d => d.Permission == permissions)).ToListAsync();
 
             foreach (var roleConnection in allRoleConnections)
             {
-                await _usersPermissions.RemoveAsync(roleConnection);
+                await _usersPermissionsRepository.RemoveAsync(roleConnection);
             }
         }
 
@@ -140,11 +143,11 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var allPermissionToUserConnections =
-                await (await _usersPermissions.GetAllAsync(d => d.User.Id == userId)).ToListAsync();
+                await (await _usersPermissionsRepository.GetAllAsync(d => d.User.Id == userId)).ToListAsync();
 
             foreach (var userConnection in allPermissionToUserConnections)
             {
-                await _usersPermissions.RemoveAsync(userConnection);
+                await _usersPermissionsRepository.RemoveAsync(userConnection);
             }
         }
 
@@ -157,6 +160,5 @@ namespace BRM.BL.UsersPermissionsService
         {
             await DeleteAllPermissionFromUser(dto.Id);
         }
-
     }
 }
