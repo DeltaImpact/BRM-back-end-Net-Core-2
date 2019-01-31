@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace BRM.DAO.Repository
         Task<T> GetByIdAsync(long id);
         Task<bool> ExistsByIdAsync(long id);
         Task<T> InsertAsync(T entity);
+        Task<ICollection<T>> InsertManyAsync(ICollection<T> entity);
         Task<T> UpdateAsync(T entity);
 
         Task<T> RemoveAsync(T entity);

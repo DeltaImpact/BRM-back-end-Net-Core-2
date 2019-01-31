@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -69,6 +70,17 @@ namespace BRM.DAO.Repository
                 throw new NullReferenceException();
 
             _entities.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
+
+        public async Task<ICollection<T>> InsertManyAsync(ICollection<T> entity)
+        {
+            if (entity == null)
+                throw new NullReferenceException();
+
+            _entities.AddRange(entity);
             await _context.SaveChangesAsync();
             return entity;
         }
