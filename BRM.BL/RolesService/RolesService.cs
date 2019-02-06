@@ -98,8 +98,8 @@ namespace BRM.BL.RolesService
 
             await _usersRolesService.DeleteAllRoleConnections(role.Id);
 
-            var removedPin = await _roleRepository.RemoveAsync(role);
-            return removedPin.ToRoleReturnDto();
+            var removedRole = await _roleRepository.RemoveAsync(role);
+            return removedRole.ToRoleReturnDto();
         }
 
         public async Task DeleteAllRolesFromUser(long userId)
