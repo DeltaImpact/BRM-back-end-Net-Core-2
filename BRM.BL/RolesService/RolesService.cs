@@ -74,16 +74,16 @@ namespace BRM.BL.RolesService
 
         public async Task<RoleReturnDto> UpdateRoleAsync(RoleUpdateDto model)
         {
-            var permissionOld =
+            var roleOld =
                 await _roleRepository.GetByIdAsync(model.Id);
-            if (permissionOld == null)
+            if (roleOld == null)
             {
                 throw new ObjectNotFoundException("Role not found.");
             }
 
-            var permission =
-                await _roleRepository.UpdateAsync(model.ToRole());
-            return permission.ToRoleReturnDto();
+            var role =
+                await _roleRepository.UpdateAsync(model.ToRole(roleOld));
+            return role.ToRoleReturnDto();
         }
 
         public async Task<RoleReturnDto> DeleteRole(long roleId)

@@ -14,5 +14,11 @@ namespace BRM.BL.Extensions.RoleDtoExtensions
             };
             return role;
         }
+
+        public static Role ToRole(this RoleUpdateDto model, Role roleOld)
+        {
+            roleOld.Name = model.Name;
+            return roleOld;
+        }
     }
 }
