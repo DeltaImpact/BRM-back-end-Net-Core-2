@@ -29,7 +29,7 @@ namespace BRM.BL.PermissionsService
         }
 
 
-        public async Task<PermissionReturnDto> AddPermission(PermissionAddDto dto)
+        public async Task<PermissionReturnDto> AddPermissionAsync(PermissionAddDto dto)
         {
             var roleInDb =
                 await (await _permissionService.GetAllAsync(d => d.Name == dto.PermissionName))
@@ -49,7 +49,7 @@ namespace BRM.BL.PermissionsService
             return user.ToPermissionReturnDto();
         }
 
-        public async Task<List<PermissionReturnDto>> GetPermissions()
+        public async Task<List<PermissionReturnDto>> GetPermissionsAsync()
         {
             var items =
                 (await _permissionService.GetAllAsync())
@@ -59,7 +59,7 @@ namespace BRM.BL.PermissionsService
             return items;
         }
 
-        public async Task<PermissionReturnDto> DeletePermission(long permissionId)
+        public async Task<PermissionReturnDto> DeletePermissionAsync(long permissionId)
         {
             var role =
                 await _permissionService.GetByIdAsync(permissionId);
@@ -69,15 +69,15 @@ namespace BRM.BL.PermissionsService
                 throw new ObjectNotFoundException("Role not found.");
             }
 
-            await _usersPermissionsService.DeleteAllPermissionConnections(role.Id);
+            await _usersPermissionsService.DeleteAllPermissionConnectionsAsync(role.Id);
 
             var removedPin = await _permissionService.RemoveAsync(role);
             return removedPin.ToPermissionReturnDto();
         }
 
-        public async Task<PermissionReturnDto> DeletePermission(DeleteByIdDto dto)
+        public async Task<PermissionReturnDto> DeletePermissionAsync(DeleteByIdDto dto)
         {
-            return await DeletePermission(dto.Id);
+            return await DeletePermissionAsync(dto.Id);
         }
 
         public async Task<PermissionReturnDto> UpdatePermissionAsync(PermissionUpdateDto model)

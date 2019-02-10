@@ -33,12 +33,12 @@ namespace BRM.BL.UsersRolesService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserRoleReturnDto> AddRoleToUser(UserRoleOrPermissionUpdateDto dto)
+        public async Task<UserRoleReturnDto> AddRoleToUserAsync(UserRoleOrPermissionUpdateDto dto)
         {
-            return await AddRoleToUser(dto.UserId, dto.RoleOrPermissionId);
+            return await AddRoleToUserAsync(dto.UserId, dto.RoleOrPermissionId);
         }
 
-        public async Task<List<UserRoleReturnDto>> AddRolesToUser(long userId, ICollection<long> rolesId)
+        public async Task<List<UserRoleReturnDto>> AddRolesToUserAsync(long userId, ICollection<long> rolesId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -65,7 +65,7 @@ namespace BRM.BL.UsersRolesService
         }
 
 
-        public async Task<UserRoleReturnDto> AddRoleToUser(long userId, long roleOrPermissionId)
+        public async Task<UserRoleReturnDto> AddRoleToUserAsync(long userId, long roleOrPermissionId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -102,10 +102,10 @@ namespace BRM.BL.UsersRolesService
             connection.Role = role;
             connection.User = user;
             return connection.ToUserRoleReturnDto();
-            //return await UserService.GetUser(connection.User.UserName);
+            //return await UserService.GetUserAsync(connection.User.UserName);
         }
 
-        public async Task DeleteRoleFromUser(UserRoleOrPermissionUpdateDto dto)
+        public async Task DeleteRoleFromUserAsync(UserRoleOrPermissionUpdateDto dto)
         {
             var user =
                 await _userRepository.GetByIdAsync(dto.UserId);
@@ -126,10 +126,10 @@ namespace BRM.BL.UsersRolesService
             }
 
             await _usersRolesRepository.RemoveAsync(userToRoleConnection);
-            //return await UserService.GetUser(removedRole.User.UserName);
+            //return await UserService.GetUserAsync(removedRole.User.UserName);
         }
 
-        public async Task DeleteAllRoleConnections(long roleId)
+        public async Task DeleteAllRoleConnectionsAsync(long roleId)
         {
             var role =
                 await _roleRepository.GetByIdAsync(roleId);
@@ -148,7 +148,7 @@ namespace BRM.BL.UsersRolesService
             }
         }
 
-        public async Task DeleteAllRoleFromUser(long userId)
+        public async Task DeleteAllRoleFromUserAsync(long userId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -167,14 +167,14 @@ namespace BRM.BL.UsersRolesService
             }
         }
 
-        public async Task DeleteAllRoleConnections(DeleteByIdDto dto)
+        public async Task DeleteAllRoleConnectionsAsync(DeleteByIdDto dto)
         {
-            await DeleteAllRoleConnections(dto.Id);
+            await DeleteAllRoleConnectionsAsync(dto.Id);
         }
 
-        public async Task DeleteAllRoleFromUser(DeleteByIdDto dto)
+        public async Task DeleteAllRoleFromUserAsync(DeleteByIdDto dto)
         {
-            await DeleteAllRoleFromUser(dto.Id);
+            await DeleteAllRoleFromUserAsync(dto.Id);
         }
     }
 }

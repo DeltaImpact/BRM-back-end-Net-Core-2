@@ -8,13 +8,13 @@ namespace BRM.BL.UsersRolesService
 {
     public interface IUsersRolesService
     {
-        Task<UserRoleReturnDto> AddRoleToUser(UserRoleOrPermissionUpdateDto dto);
-        Task<UserRoleReturnDto> AddRoleToUser(long userId, long roleOrPermissionId);
-        Task<List<UserRoleReturnDto>> AddRolesToUser(long userId, ICollection<long> rolesId);
-        Task DeleteRoleFromUser(UserRoleOrPermissionUpdateDto dto);
-        Task DeleteAllRoleConnections(long roleId);
-        Task DeleteAllRoleFromUser(long userId);
-        Task DeleteAllRoleConnections(DeleteByIdDto dto);
-        Task DeleteAllRoleFromUser(DeleteByIdDto dto);
+        Task<UserRoleReturnDto> AddRoleToUserAsync(UserRoleOrPermissionUpdateDto dto);
+        Task<UserRoleReturnDto> AddRoleToUserAsync(long userId, long roleOrPermissionId);
+        Task<List<UserRoleReturnDto>> AddRolesToUserAsync(long userId, ICollection<long> rolesId);
+        Task DeleteRoleFromUserAsync(UserRoleOrPermissionUpdateDto dto);
+        Task DeleteAllRoleConnectionsAsync(long roleId);
+        Task DeleteAllRoleFromUserAsync(long userId);
+        Task DeleteAllRoleConnectionsAsync(DeleteByIdDto dto);
+        Task DeleteAllRoleFromUserAsync(DeleteByIdDto dto);
     }
 }

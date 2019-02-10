@@ -35,7 +35,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var user = await _userService.GetUser(dto);
+                var user = await _userService.GetUserAsync(dto);
                 return Ok(user);
             }
             catch (Exception ex)
@@ -50,7 +50,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var user = await _userService.GetUsers();
+                var user = await _userService.GetUsersAsync();
                 return Ok(user);
             }
             catch (Exception ex)
@@ -66,13 +66,13 @@ namespace BRM.Controllers
         {
             try
             {
-                var newUser = await _userService.AddUser(dto);
+                var newUser = await _userService.AddUserAsync(dto);
 
                 if (dto.RolesId.Count == 0 && dto.PermissionsId.Count == 0)
                     return Ok(newUser);
 
-                var roles = await _usersRolesService.AddRolesToUser(newUser.Id, dto.RolesId);
-                var permissions = await _usersPermissionsService.AddPermissionsToUser(newUser.Id, dto.PermissionsId);
+                var roles = await _usersRolesService.AddRolesToUserAsync(newUser.Id, dto.RolesId);
+                var permissions = await _usersPermissionsService.AddPermissionsToUserAsync(newUser.Id, dto.PermissionsId);
                 newUser.Roles = roles.Select(o => o.Role).ToList();
                 newUser.Permissions = permissions.Select(o => o.Permission).ToList();
                 return Ok(newUser);
@@ -90,7 +90,7 @@ namespace BRM.Controllers
         {
             try
             {
-                await _userService.DeleteUser(id);
+                await _userService.DeleteUserAsync(id);
                 return Ok();
                 //return Ok();
             }

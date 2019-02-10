@@ -28,7 +28,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var user = await _permissionsService.GetPermissions();
+                var user = await _permissionsService.GetPermissionsAsync();
                 return Ok(user);
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _permissionsService.AddPermission(dto);
+                var responsePayload = await _permissionsService.AddPermissionAsync(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
@@ -78,7 +78,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _usersPermissionsService.AddPermissionToUser(dto);
+                var responsePayload = await _usersPermissionsService.AddPermissionToUserAsync(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace BRM.Controllers
         {
             try
             {
-                await _usersPermissionsService.DeletePermissionFromUser(dto);
+                await _usersPermissionsService.DeletePermissionFromUserAsync(dto);
                 return Ok();
             }
             catch (Exception ex)
@@ -111,7 +111,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _permissionsService.DeletePermission(id);
+                var responsePayload = await _permissionsService.DeletePermissionAsync(id);
                 return Ok(responsePayload);
             }
             catch (Exception ex)

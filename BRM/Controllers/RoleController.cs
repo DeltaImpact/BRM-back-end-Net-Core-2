@@ -28,7 +28,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var user = await _rolesService.GetRoles();
+                var user = await _rolesService.GetRolesAsync();
                 return Ok(user);
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _rolesService.AddRole(dto);
+                var responsePayload = await _rolesService.AddRoleAsync(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
@@ -60,7 +60,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _usersRolesService.AddRoleToUser(dto);
+                var responsePayload = await _usersRolesService.AddRoleToUserAsync(dto);
                 return Ok(responsePayload);
             }
             catch (Exception ex)
@@ -76,7 +76,7 @@ namespace BRM.Controllers
         {
             try
             {
-                await _usersRolesService.DeleteRoleFromUser(dto);
+                await _usersRolesService.DeleteRoleFromUserAsync(dto);
                 return Ok();
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace BRM.Controllers
         {
             try
             {
-                var responsePayload = await _rolesService.DeleteRole(id);
+                var responsePayload = await _rolesService.DeleteRoleAsync(id);
                 return Ok(responsePayload);
             }
             catch (Exception ex)

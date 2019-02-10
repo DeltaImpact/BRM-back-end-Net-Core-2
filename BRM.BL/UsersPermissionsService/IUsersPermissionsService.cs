@@ -10,15 +10,15 @@ namespace BRM.BL.UsersPermissionsService
 {
     public interface IUsersPermissionsService
     {
-        Task<UserPermissionReturnDto> AddPermissionToUser(long userId, long permissionId);
-        Task<UserPermissionReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto);
-        Task<List<UserPermissionReturnDto>> AddPermissionsToUser(long userId, ICollection<long> permissionsId);
-        Task DeletePermissionFromUser(long userId, long permissionId);
-        Task DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto);
-        Task DeleteAllPermissionConnections(long permissionId);
-        Task DeleteAllPermissionConnections(DeleteByIdDto dto);
-        Task DeleteAllPermissionFromUser(long userId);
-        Task DeleteAllPermissionFromUser(DeleteByIdDto dto);
+        Task<UserPermissionReturnDto> AddPermissionToUserAsync(long userId, long permissionId);
+        Task<UserPermissionReturnDto> AddPermissionToUserAsync(UserRoleOrPermissionUpdateDto dto);
+        Task<List<UserPermissionReturnDto>> AddPermissionsToUserAsync(long userId, ICollection<long> permissionsId);
+        Task DeletePermissionFromUserAsync(long userId, long permissionId);
+        Task DeletePermissionFromUserAsync(UserRoleOrPermissionUpdateDto dto);
+        Task DeleteAllPermissionConnectionsAsync(long permissionId);
+        Task DeleteAllPermissionConnectionsAsync(DeleteByIdDto dto);
+        Task DeleteAllPermissionFromUserAsync(long userId);
+        Task DeleteAllPermissionFromUserAsync(DeleteByIdDto dto);
         
     }
 }

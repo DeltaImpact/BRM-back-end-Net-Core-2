@@ -40,7 +40,7 @@ namespace BRM.BL.UsersPermissionsService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserPermissionReturnDto> AddPermissionToUser(long userId, long permissionId)
+        public async Task<UserPermissionReturnDto> AddPermissionToUserAsync(long userId, long permissionId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -79,7 +79,7 @@ namespace BRM.BL.UsersPermissionsService
             return connection.ToUserPermissionReturnDto();
         }
 
-        public async Task<List<UserPermissionReturnDto>> AddPermissionsToUser(long userId, ICollection<long> permissionsId)
+        public async Task<List<UserPermissionReturnDto>> AddPermissionsToUserAsync(long userId, ICollection<long> permissionsId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -105,7 +105,7 @@ namespace BRM.BL.UsersPermissionsService
             return connections;
         }
 
-        public async Task DeletePermissionFromUser(long userId, long permissionId)
+        public async Task DeletePermissionFromUserAsync(long userId, long permissionId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -127,20 +127,20 @@ namespace BRM.BL.UsersPermissionsService
 
             var removedPermission = await _usersPermissionsRepository.RemoveAsync(userToPermissionConnection);
             //return removedPermission.ToUserPermissionReturnDto();
-            //return await _userService.GetUser(removedPermission.User.UserName);
+            //return await _userService.GetUserAsync(removedPermission.User.UserName);
         }
 
-        public Task<UserPermissionReturnDto> AddPermissionToUser(UserRoleOrPermissionUpdateDto dto)
+        public Task<UserPermissionReturnDto> AddPermissionToUserAsync(UserRoleOrPermissionUpdateDto dto)
         {
-            return AddPermissionToUser(dto.UserId, dto.RoleOrPermissionId);
+            return AddPermissionToUserAsync(dto.UserId, dto.RoleOrPermissionId);
         }
 
-        public Task DeletePermissionFromUser(UserRoleOrPermissionUpdateDto dto)
+        public Task DeletePermissionFromUserAsync(UserRoleOrPermissionUpdateDto dto)
         {
-            return DeletePermissionFromUser(dto.UserId, dto.RoleOrPermissionId);
+            return DeletePermissionFromUserAsync(dto.UserId, dto.RoleOrPermissionId);
         }
 
-        public async Task DeleteAllPermissionConnections(long permissionId)
+        public async Task DeleteAllPermissionConnectionsAsync(long permissionId)
         {
             var permissions =
                 await _permissionRepository.GetByIdAsync(permissionId);
@@ -159,7 +159,7 @@ namespace BRM.BL.UsersPermissionsService
             }
         }
 
-        public async Task DeleteAllPermissionFromUser(long userId)
+        public async Task DeleteAllPermissionFromUserAsync(long userId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -178,14 +178,14 @@ namespace BRM.BL.UsersPermissionsService
             }
         }
 
-        public async Task DeleteAllPermissionConnections(DeleteByIdDto dto)
+        public async Task DeleteAllPermissionConnectionsAsync(DeleteByIdDto dto)
         {
-            await DeleteAllPermissionConnections(dto.Id);
+            await DeleteAllPermissionConnectionsAsync(dto.Id);
         }
 
-        public async Task DeleteAllPermissionFromUser(DeleteByIdDto dto)
+        public async Task DeleteAllPermissionFromUserAsync(DeleteByIdDto dto)
         {
-            await DeleteAllPermissionFromUser(dto.Id);
+            await DeleteAllPermissionFromUserAsync(dto.Id);
         }
     }
 }

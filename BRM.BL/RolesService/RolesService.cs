@@ -35,14 +35,14 @@ namespace BRM.BL.RolesService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<RoleReturnDto> AddRole(RoleAddDto dto)
+        public async Task<RoleReturnDto> AddRoleAsync(RoleAddDto dto)
         {
             var roleInDb =
                 await (await _roleRepository.GetAllAsync(d => d.Name == dto.RoleName))
                     .FirstOrDefaultAsync();
             if (roleInDb != null)
             {
-                throw new ObjectAlreadyExistException("UserRole with such name already added.");
+                throw new ObjectAlreadyExistException("Role with such name already added.");
             }
 
             var userForDb = new Role
@@ -57,7 +57,7 @@ namespace BRM.BL.RolesService
             //throw new NotImplementedException();
         }
 
-        public async Task<List<RoleReturnDto>> GetRoles()
+        public async Task<List<RoleReturnDto>> GetRolesAsync()
         {
             var roles =
                 (await _roleRepository.GetAllAsync())
@@ -67,9 +67,9 @@ namespace BRM.BL.RolesService
             return roles;
         }
 
-        public async Task<RoleReturnDto> DeleteRole(DeleteByIdDto dto)
+        public async Task<RoleReturnDto> DeleteRoleAsync(DeleteByIdDto dto)
         {
-            return await DeleteRole(dto.Id);
+            return await DeleteRoleAsync(dto.Id);
         }
 
         public async Task<RoleReturnDto> UpdateRoleAsync(RoleUpdateDto model)
@@ -81,12 +81,17 @@ namespace BRM.BL.RolesService
                 throw new ObjectNotFoundException("Role not found.");
             }
 
+            if ((await _roleRepository.GetAllAsync(d => d.Name == model.Name)).Any())
+            {
+                throw new ObjectAlreadyExistException("Role with such name already added.");
+            }
+
             var role =
                 await _roleRepository.UpdateAsync(model.ToRole(roleOld));
             return role.ToRoleReturnDto();
         }
 
-        public async Task<RoleReturnDto> DeleteRole(long roleId)
+        public async Task<RoleReturnDto> DeleteRoleAsync(long roleId)
         {
             var role =
                 await _roleRepository.GetByIdAsync(roleId);
@@ -96,7 +101,7 @@ namespace BRM.BL.RolesService
                 throw new ObjectNotFoundException("Role not found.");
             }
 
-            await _usersRolesService.DeleteAllRoleConnections(role.Id);
+            await _usersRolesService.DeleteAllRoleConnectionsAsync(role.Id);
 
             var removedRole = await _roleRepository.RemoveAsync(role);
             return removedRole.ToRoleReturnDto();

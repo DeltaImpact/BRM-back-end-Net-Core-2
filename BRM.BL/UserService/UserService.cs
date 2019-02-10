@@ -46,12 +46,12 @@ namespace BRM.BL.UserService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<UserReturnDto> AddUser(UserAddDto dto)
+        public Task<UserReturnDto> AddUserAsync(UserAddDto dto)
         {
-            return AddUser(dto.Username);
+            return AddUserAsync(dto.Username);
         }
 
-        public async Task<UserReturnDto> AddUser(string nickname)
+        public async Task<UserReturnDto> AddUserAsync(string nickname)
         {
             var userInDb =
                 await (await _userRepository.GetAllAsync(d => d.UserName == nickname))
@@ -74,12 +74,12 @@ namespace BRM.BL.UserService
             //throw new NotImplementedException();
         }
 
-        public Task<UserReturnDto> GetUser(UserAddDto dto)
+        public Task<UserReturnDto> GetUserAsync(UserAddDto dto)
         {
-            return GetUser(dto.Username);
+            return GetUserAsync(dto.Username);
         }
 
-        public async Task<UserReturnDto> GetUserById(long id)
+        public async Task<UserReturnDto> GetUserByIdAsync(long id)
         {
             var userInDb =
                 await _userRepository.GetByIdAsync(id);
@@ -101,7 +101,7 @@ namespace BRM.BL.UserService
             return userInDb.ToUserReturnDto(await permissions, await roles);
         }
 
-        public async Task<UserReturnDto> GetUser(string nickname)
+        public async Task<UserReturnDto> GetUserAsync(string nickname)
         {
             var userInDb =
                 await (await _userRepository.GetAllAsync(d => d.UserName == nickname))
@@ -124,7 +124,7 @@ namespace BRM.BL.UserService
             return userInDb.ToUserReturnDto(await permissions, await roles);
         }
 
-        public async Task<List<UserReturnDto>> GetUsers()
+        public async Task<List<UserReturnDto>> GetUsersAsync()
         {
             var users =
                 (await _userRepository.GetAllAsync())
@@ -139,12 +139,12 @@ namespace BRM.BL.UserService
             return users;
         }
 
-        public async Task DeleteUser(DeleteByIdDto dto)
+        public async Task DeleteUserAsync(DeleteByIdDto dto)
         {
-            await DeleteUser(dto.Id);
+            await DeleteUserAsync(dto.Id);
         }
 
-        public async Task DeleteUser(long userId)
+        public async Task DeleteUserAsync(long userId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -155,8 +155,8 @@ namespace BRM.BL.UserService
             }
 
 
-            await _usersRolesService.DeleteAllRoleFromUser(user.Id);
-            await _usersPermissionsService.DeleteAllPermissionFromUser(user.Id);
+            await _usersRolesService.DeleteAllRoleFromUserAsync(user.Id);
+            await _usersPermissionsService.DeleteAllPermissionFromUserAsync(user.Id);
 
             await _userRepository.RemoveAsync(user);
         }

@@ -8,14 +8,14 @@ namespace BRM.BL.UserService
 {
     public interface IUserService
     {
-        Task<UserReturnDto> AddUser(UserAddDto dto);
-        Task<UserReturnDto> AddUser(string nickname);
-        Task<UserReturnDto> GetUser(UserAddDto dto);
-        Task<UserReturnDto> GetUserById(long id);
-        Task<UserReturnDto> GetUser(string nickname);
-        Task<List<UserReturnDto>> GetUsers();
-        Task DeleteUser(long userId);
-        Task DeleteUser(DeleteByIdDto dto);
+        Task<UserReturnDto> AddUserAsync(UserAddDto dto);
+        Task<UserReturnDto> AddUserAsync(string nickname);
+        Task<UserReturnDto> GetUserAsync(UserAddDto dto);
+        Task<UserReturnDto> GetUserByIdAsync(long id);
+        Task<UserReturnDto> GetUserAsync(string nickname);
+        Task<List<UserReturnDto>> GetUsersAsync();
+        Task DeleteUserAsync(long userId);
+        Task DeleteUserAsync(DeleteByIdDto dto);
         Task<UserReturnDto> UpdateUserAsync(UserUpdateDto model);
     }
 }
