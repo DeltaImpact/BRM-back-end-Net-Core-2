@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BRM.Controllers
 {
-    [Route("permission")]
+    [Route("permissions")]
     [ApiController]
     public class PermissionController : ControllerBase
     {
@@ -22,7 +22,7 @@ namespace BRM.Controllers
             _usersPermissionsService = usersPermissionsService;
         }
 
-        [HttpGet("permissions")]
+        [HttpGet]
         public async Task<IActionResult> GetPermissions(
         )
         {
@@ -37,7 +37,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpPost("addPermission")]
+        [HttpPost("permission")]
         public async Task<IActionResult> AddPermission(
             PermissionAddDto dto
         )
@@ -54,7 +54,7 @@ namespace BRM.Controllers
         }
 
 
-        [HttpPut("updatePermission")]
+        [HttpPut("permission")]
         public async Task<IActionResult> UpdatePermission(
             PermissionUpdateDto model
         )
@@ -104,7 +104,7 @@ namespace BRM.Controllers
         }
 
 
-        [HttpDelete("deletePermission")]
+        [HttpDelete("permission")]
         public async Task<IActionResult> RemovePermission(
             [Required] int id
         )

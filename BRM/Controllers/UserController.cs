@@ -12,7 +12,7 @@ using UserAddDto = BRM.BL.Models.UserDto.UserAddDto;
 
 namespace BRM.Controllers
 {
-    [Route("user")]
+    [Route("users")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -44,7 +44,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpGet("users")]
+        [HttpGet]
         public async Task<IActionResult> GetUsers(
         )
         {
@@ -59,7 +59,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpPost("register")]
+        [HttpPost("user")]
         public async Task<IActionResult> Register(
             UserAddDto dto
         )
@@ -72,7 +72,8 @@ namespace BRM.Controllers
                     return Ok(newUser);
 
                 var roles = await _usersRolesService.AddRolesToUserAsync(newUser.Id, dto.RolesId);
-                var permissions = await _usersPermissionsService.AddPermissionsToUserAsync(newUser.Id, dto.PermissionsId);
+                var permissions =
+                    await _usersPermissionsService.AddPermissionsToUserAsync(newUser.Id, dto.PermissionsId);
                 newUser.Roles = roles.Select(o => o.Role).ToList();
                 newUser.Permissions = permissions.Select(o => o.Permission).ToList();
                 return Ok(newUser);
@@ -83,7 +84,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpDelete("deleteUser")]
+        [HttpDelete("user")]
         public async Task<IActionResult> DeleteUser(
             [Required] int id
         )
@@ -101,7 +102,7 @@ namespace BRM.Controllers
         }
 
 
-        [HttpPut("update")]
+        [HttpPut("user")]
         public async Task<IActionResult> UpdateRole(
             UserUpdateDto dto
         )

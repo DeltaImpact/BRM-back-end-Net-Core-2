@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BRM.Controllers
 {
-    [Route("role")]
+    [Route("roles")]
     [ApiController]
     public class RoleController : ControllerBase
     {
@@ -22,7 +22,7 @@ namespace BRM.Controllers
             _usersRolesService = usersRolesService;
         }
 
-        [HttpGet("roles")]
+        [HttpGet]
         public async Task<IActionResult> GetRoles(
         )
         {
@@ -37,7 +37,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpPost("addRole")]
+        [HttpPost("role")]
         public async Task<IActionResult> AddRole(
             RoleAddDto dto
         )
@@ -86,7 +86,7 @@ namespace BRM.Controllers
         }
 
 
-        [HttpDelete("deleteRole")]
+        [HttpDelete("role")]
         public async Task<IActionResult> RemoveRole(
             [Required] int id
         )
@@ -102,7 +102,7 @@ namespace BRM.Controllers
             }
         }
 
-        [HttpPut("updateRole")]
+        [HttpPut("role")]
         public async Task<IActionResult> UpdateRole(
             RoleUpdateDto dto
         )
