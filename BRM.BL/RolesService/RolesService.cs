@@ -81,7 +81,7 @@ namespace BRM.BL.RolesService
                 throw new ObjectNotFoundException("Role not found.");
             }
 
-            if ((await _roleRepository.GetAllAsync(d => d.Name == model.Name)).Any())
+            if ((await _roleRepository.GetAllAsync(d => d.Name == model.Name && d.Id != model.Id)).Any())
             {
                 throw new ObjectAlreadyExistException("Role with such name already added.");
             }
