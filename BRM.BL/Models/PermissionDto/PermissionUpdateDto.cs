@@ -1,8 +1,10 @@
-﻿namespace BRM.BL.Models.PermissionDto
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BRM.BL.Models.PermissionDto
 {
     public class PermissionUpdateDto
     {
-        public string Name { get; set; }
-        public long Id { get; set; }
+        [Required] public string Name { get; set; }
+        [Required] public long Id { get; set; }
     }
 }
