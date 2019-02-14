@@ -170,7 +170,7 @@ namespace BRM.BL.UserService
                 throw new ObjectNotFoundException("User not found.");
             }
 
-            if ((await _userRepository.GetAllAsync(x => x.UserName == model.Name)).Any())
+            if ((await _userRepository.GetAllAsync(x => x.UserName == model.UserName && x.Id != model.Id)).Any())
                 throw new ObjectNotFoundException("User with same nickname already exist.");
 
             userOld.UserName = model.Name;

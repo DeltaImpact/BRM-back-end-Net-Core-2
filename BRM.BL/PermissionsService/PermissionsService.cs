@@ -89,6 +89,11 @@ namespace BRM.BL.PermissionsService
                 throw new ObjectNotFoundException("Permission not found.");
             }
 
+            if ((await _permissionService.GetAllAsync(d => d.Name == model.Name && d.Id != model.Id)).Any())
+            {
+                throw new ObjectAlreadyExistException("Permission with such name already added.");
+            }
+
             var permission =
                 await _permissionService.UpdateAsync(model.ToPermission());
             return permission.ToPermissionReturnDto();
