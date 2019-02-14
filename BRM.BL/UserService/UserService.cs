@@ -7,6 +7,8 @@ using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserDtoExtensions;
 using BRM.BL.Models;
 using BRM.BL.Models.UserDto;
+using BRM.BL.Models.UserPermissionDto;
+using BRM.BL.Models.UserRoleDto;
 using BRM.BL.UsersPermissionsService;
 using BRM.BL.UsersRolesService;
 using BRM.DAO.Entities;
@@ -164,7 +166,13 @@ namespace BRM.BL.UserService
         public async Task<UserReturnDto> UpdateUserAsync(UserUpdateDto model)
         {
             var userOld =
-                await _userRepository.GetByIdAsync(model.Id);
+                await (await _userRepository.GetAllAsync(u => u.Id == model.Id))
+                    .Include(e => e.Permissions)
+                    .ThenInclude(e => e.Permission)
+                    .Include(e => e.Roles)
+                    .ThenInclude(e => e.Role)
+                    .FirstAsync();
+
             if (userOld == null)
             {
                 throw new ObjectNotFoundException("User not found.");
@@ -172,11 +180,49 @@ namespace BRM.BL.UserService
 
             if ((await _userRepository.GetAllAsync(x => x.UserName == model.UserName && x.Id != model.Id)).Any())
                 throw new ObjectNotFoundException("User with same nickname already exist.");
+            userOld.UserName = model.UserName;
 
-            userOld.UserName = model.Name;
+
+            var newRoleConnections = new List<UserRoleReturnDto>();
+            var rolesToAddIds = model.RolesId.Except(userOld.Roles.Select(e => e.Role.Id).ToArray()).ToList();
+            if (rolesToAddIds.Count != 0)
+            {
+                newRoleConnections = await _usersRolesService.AddRolesToUserAsync(userOld.Id, rolesToAddIds);
+            }
+
+            var rolesToDeleteIds = userOld.Roles.Select(e => e.Role.Id).ToArray().Except(model.RolesId).ToList();
+            if (rolesToDeleteIds.Count != 0)
+            {
+                userOld.Roles = userOld.Roles.Where(e => !rolesToDeleteIds.Contains(e.Id)).ToList();
+
+                await _usersRolesService.DeleteRolesFromUserAsync(userOld, rolesToDeleteIds);
+            }
+
+            var newPermissionsConnections = new List<UserPermissionReturnDto>();
+            var permissionsToAddIds =
+                model.PermissionsId.Except(userOld.Permissions.Select(e => e.Permission.Id).ToArray()).ToList();
+            if (permissionsToAddIds.Count != 0)
+            {
+                newPermissionsConnections =
+                    await _usersPermissionsService.AddPermissionsToUserAsync(userOld.Id, permissionsToAddIds);
+            }
+
+            var permissionsToDeleteIds =
+                userOld.Permissions.Select(e => e.Permission.Id).ToArray().Except(model.PermissionsId).ToList();
+            if (permissionsToDeleteIds.Count != 0)
+            {
+                await _usersPermissionsService.DeletePermissionsToUserAsync(userOld, permissionsToDeleteIds);
+                userOld.Permissions = userOld.Permissions.Where(e => !permissionsToDeleteIds.Contains(e.Id)).ToList();
+            }
+
 
             var user =
                 await _userRepository.UpdateAsync(userOld);
+            var userReturnDto = user.ToUserReturnDto();
+
+            userReturnDto.Roles.AddRange(newRoleConnections.Select(e => e.Role));
+            userReturnDto.Permissions.AddRange(newPermissionsConnections.Select(e => e.Permission));
+
             return user.ToUserReturnDto();
         }
     }

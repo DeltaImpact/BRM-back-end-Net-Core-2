@@ -79,7 +79,8 @@ namespace BRM.BL.UsersPermissionsService
             return connection.ToUserPermissionReturnDto();
         }
 
-        public async Task<List<UserPermissionReturnDto>> AddPermissionsToUserAsync(long userId, ICollection<long> permissionsId)
+        public async Task<List<UserPermissionReturnDto>> AddPermissionsToUserAsync(long userId,
+            ICollection<long> permissionsId)
         {
             var user =
                 await _userRepository.GetByIdAsync(userId);
@@ -101,8 +102,30 @@ namespace BRM.BL.UsersPermissionsService
                     User = user
                 }).ToArray();
 
-            var connections = (await _usersPermissionsRepository.InsertManyAsync(toInsert)).Select(o => o.ToUserPermissionReturnDto()).ToList();
+            var connections = (await _usersPermissionsRepository.InsertManyAsync(toInsert))
+                .Select(o => o.ToUserPermissionReturnDto()).ToList();
             return connections;
+        }
+
+        public async Task<List<UserPermissionReturnDto>> DeletePermissionsToUserAsync(User user,
+            ICollection<long> permissionsId)
+        {
+            var roles = await _permissionRepository.GetAllAsync(o => permissionsId.Contains(o.Id));
+            foreach (var role in roles)
+            {
+                if (!permissionsId.Contains(role.Id)) throw new ObjectNotFoundException("Role not found.");
+            }
+
+            var rolesToRemove = roles.Select(permission =>
+                new UsersPermissions()
+                {
+                    Permission = permission,
+                    User = user
+                }).ToArray();
+
+            var disconnections = (await _usersPermissionsRepository.RemoveManyAsync(rolesToRemove))
+                .Select(o => o.ToUserPermissionReturnDto()).ToList();
+            return disconnections;
         }
 
         public async Task DeletePermissionFromUserAsync(long userId, long permissionId)
@@ -116,7 +139,8 @@ namespace BRM.BL.UsersPermissionsService
             }
 
             var userToPermissionConnection =
-                await (await _usersPermissionsRepository.GetAllAsync(d => d.User == user && d.Permission.Id == permissionId,
+                await (await _usersPermissionsRepository.GetAllAsync(
+                        d => d.User == user && d.Permission.Id == permissionId,
                         i => i.User))
                     .FirstOrDefaultAsync();
 

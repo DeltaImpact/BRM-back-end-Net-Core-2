@@ -37,12 +37,14 @@ namespace BRM.DAO.Repository
         //public async Task<IQueryable<T>> GetAllAsync(Expression<Func<T, bool>> predicate = null) =>
         //    await Task.Run(() => predicate != null ? _entities.Where(predicate) : _entities);
 
-        public async Task<IQueryable<T>> GetAllAsync(Expression<Func<T, bool>> predicate = null, params Expression<Func<T, object>>[] includes)
+        public async Task<IQueryable<T>> GetAllAsync(Expression<Func<T, bool>> predicate = null,
+            params Expression<Func<T, object>>[] includes)
         {
             return await Task.Run(() =>
             {
                 var result = this._entities.AsQueryable();
-                if (includes != null) result = includes.Aggregate(result, (current, expression) => current.Include(expression));
+                if (includes != null)
+                    result = includes.Aggregate(result, (current, expression) => current.Include(expression));
                 return predicate != null ? result.Where(predicate) : result;
             });
         }
@@ -53,7 +55,8 @@ namespace BRM.DAO.Repository
             return await Task.Run(() =>
             {
                 var result = this._entities.AsQueryable();
-                if (includes != null) result = includes.Aggregate(result, (current, expression) => current.Include(expression));
+                if (includes != null)
+                    result = includes.Aggregate(result, (current, expression) => current.Include(expression));
                 return result;
             });
         }
@@ -81,6 +84,16 @@ namespace BRM.DAO.Repository
                 throw new NullReferenceException();
 
             _entities.AddRange(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task<ICollection<T>> RemoveManyAsync(ICollection<T> entity)
+        {
+            if (entity == null)
+                throw new NullReferenceException();
+
+            _entities.RemoveRange(entity);
             await _context.SaveChangesAsync();
             return entity;
         }

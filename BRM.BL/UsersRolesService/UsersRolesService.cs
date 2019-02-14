@@ -60,8 +60,29 @@ namespace BRM.BL.UsersRolesService
                     User = user
                 }).ToArray();
 
-            var connections = (await _usersRolesRepository.InsertManyAsync(rolesToInsert)).Select(o => o.ToUserRoleReturnDto()).ToList();
+            var connections = (await _usersRolesRepository.InsertManyAsync(rolesToInsert))
+                .Select(o => o.ToUserRoleReturnDto()).ToList();
             return connections;
+        }
+
+        public async Task<List<UserRoleReturnDto>> DeleteRolesFromUserAsync(User user, ICollection<long> rolesId)
+        {
+            var roles = await _roleRepository.GetAllAsync(o => rolesId.Contains(o.Id));
+            foreach (var role in roles)
+            {
+                if (!rolesId.Contains(role.Id)) throw new ObjectNotFoundException("Role not found.");
+            }
+
+            var rolesToRemove = roles.Select(role =>
+                new UsersRoles
+                {
+                    Role = role,
+                    User = user
+                }).ToArray();
+
+            var disconnections = (await _usersRolesRepository.RemoveManyAsync(rolesToRemove))
+                .Select(o => o.ToUserRoleReturnDto()).ToList();
+            return disconnections;
         }
 
 
