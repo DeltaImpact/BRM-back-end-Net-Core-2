@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace BRM
 {
@@ -29,7 +30,6 @@ namespace BRM
                         .AllowAnyHeader()
                         .AllowAnyOrigin()
                         .AllowCredentials();
-
                 }));
             services.AddSignalR();
             services.AddRepository();
@@ -38,6 +38,16 @@ namespace BRM
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly("BRM.DAO")));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info
+                {
+                    Title = "BRM Swagger overview",
+                    Version = "v1",
+                    Description = "BRM",
+                    TermsOfService = "None",
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +67,12 @@ namespace BRM
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseAuthentication();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "BRM Swagger overview");
+                c.RoutePrefix = string.Empty;
+            });
             app.UseMvc();
         }
     }
