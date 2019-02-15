@@ -48,9 +48,38 @@ namespace BRM.BL.UserService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<UserReturnDto> AddUserAsync(UserAddDto dto)
+        public async Task<UserReturnDto> AddUserAsync(UserAddDto dto)
         {
-            return AddUserAsync(dto.Username);
+            var userInDb =
+                await (await _userRepository.GetAllAsync(d => d.UserName == dto.Username))
+                    .FirstOrDefaultAsync();
+            if (userInDb != null)
+            {
+                throw new ObjectAlreadyExistException("User with such name already added.");
+            }
+
+            var userForDb = new User
+            {
+                UserName = dto.Username,
+            };
+
+            var user = (await _userRepository.InsertAsync(userForDb)).ToUserReturnDto();
+
+
+            if (dto.RolesIds.Count != 0)
+            {
+                var roles = await _usersRolesService.AddRolesToUserAsync(user.Id, dto.RolesIds);
+                user.Roles = roles.Select(o => o.Role).ToList();
+            }
+
+            if (dto.PermissionsIds.Count != 0)
+            {
+                var permissions =
+                    await _usersPermissionsService.AddPermissionsToUserAsync(user.Id, dto.PermissionsIds);
+                user.Permissions = permissions.Select(o => o.Permission).ToList();
+            }
+
+            return user;
         }
 
         public async Task<UserReturnDto> AddUserAsync(string nickname)
