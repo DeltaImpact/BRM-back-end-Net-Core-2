@@ -88,14 +88,13 @@ namespace BRM.DAO.Repository
             return entity;
         }
 
-        public async Task<ICollection<T>> RemoveManyAsync(ICollection<T> entity)
+        public async Task RemoveManyAsync(ICollection<T> entity)
         {
             if (entity == null)
                 throw new NullReferenceException();
 
             _entities.RemoveRange(entity);
             await _context.SaveChangesAsync();
-            return entity;
         }
 
         public async Task<T> UpdateAsync(T entity)

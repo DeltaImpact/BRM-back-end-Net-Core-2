@@ -14,7 +14,8 @@ namespace BRM.BL.UsersPermissionsService
         Task<UserPermissionReturnDto> AddPermissionToUserAsync(long userId, long permissionId);
         Task<UserPermissionReturnDto> AddPermissionToUserAsync(UserRoleOrPermissionUpdateDto dto);
         Task<List<UserPermissionReturnDto>> AddPermissionsToUserAsync(long userId, ICollection<long> permissionsId);
-        Task<List<UserPermissionReturnDto>> DeletePermissionsToUserAsync(User user, ICollection<long> permissionsId);
+        Task<List<UserPermissionReturnDto>> DeletePermissionsFromUserAsync(User user,
+            List<long> permissionIds);
         Task DeletePermissionFromUserAsync(long userId, long permissionId);
         Task DeletePermissionFromUserAsync(UserRoleOrPermissionUpdateDto dto);
         Task DeleteAllPermissionConnectionsAsync(long permissionId);

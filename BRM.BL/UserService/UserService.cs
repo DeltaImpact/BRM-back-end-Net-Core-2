@@ -182,48 +182,90 @@ namespace BRM.BL.UserService
                 throw new ObjectNotFoundException("User with same nickname already exist.");
             userOld.UserName = model.UserName;
 
-
-            var newRoleConnections = new List<UserRoleReturnDto>();
-            var rolesToAddIds = model.RolesId.Except(userOld.Roles.Select(e => e.Role.Id).ToArray()).ToList();
-            if (rolesToAddIds.Count != 0)
-            {
-                newRoleConnections = await _usersRolesService.AddRolesToUserAsync(userOld.Id, rolesToAddIds);
-            }
-
-            var rolesToDeleteIds = userOld.Roles.Select(e => e.Role.Id).ToArray().Except(model.RolesId).ToList();
-            if (rolesToDeleteIds.Count != 0)
-            {
-                userOld.Roles = userOld.Roles.Where(e => !rolesToDeleteIds.Contains(e.Id)).ToList();
-
-                await _usersRolesService.DeleteRolesFromUserAsync(userOld, rolesToDeleteIds);
-            }
-
-            var newPermissionsConnections = new List<UserPermissionReturnDto>();
-            var permissionsToAddIds =
-                model.PermissionsId.Except(userOld.Permissions.Select(e => e.Permission.Id).ToArray()).ToList();
-            if (permissionsToAddIds.Count != 0)
-            {
-                newPermissionsConnections =
-                    await _usersPermissionsService.AddPermissionsToUserAsync(userOld.Id, permissionsToAddIds);
-            }
-
-            var permissionsToDeleteIds =
-                userOld.Permissions.Select(e => e.Permission.Id).ToArray().Except(model.PermissionsId).ToList();
-            if (permissionsToDeleteIds.Count != 0)
-            {
-                await _usersPermissionsService.DeletePermissionsToUserAsync(userOld, permissionsToDeleteIds);
-                userOld.Permissions = userOld.Permissions.Where(e => !permissionsToDeleteIds.Contains(e.Id)).ToList();
-            }
-
+            userOld.Permissions = await DeleteExcessPermissionsFromUser(userOld, model.PermissionsIds);
+            userOld.Roles = await DeleteExcessRolesFromUser(userOld, model.RolesIds);
 
             var user =
                 await _userRepository.UpdateAsync(userOld);
             var userReturnDto = user.ToUserReturnDto();
 
-            userReturnDto.Roles.AddRange(newRoleConnections.Select(e => e.Role));
-            userReturnDto.Permissions.AddRange(newPermissionsConnections.Select(e => e.Permission));
+            if (userOld.Permissions.Count == 0)
+            {
+                userReturnDto.Permissions =
+                    (await AddMissingPermissionsToUser(userOld, model.PermissionsIds)).Select(e => e.Permission)
+                    .ToList();
+            }
+            else
+            {
+                userReturnDto.Permissions.AddRange(
+                    (await AddMissingPermissionsToUser(userOld, model.PermissionsIds)).Select(e => e.Permission));
+            }
 
-            return user.ToUserReturnDto();
+            if (userOld.Roles.Count == 0)
+            {
+                userReturnDto.Roles =
+                    (await AddMissingRolesToUser(userOld, model.RolesIds)).Select(e => e.Role).ToList();
+            }
+            else
+            {
+                userReturnDto.Roles.AddRange(
+                    (await AddMissingRolesToUser(userOld, model.RolesIds)).Select(e => e.Role));
+            }
+
+
+            return userReturnDto;
+        }
+
+        private async Task<List<UserPermissionReturnDto>> AddMissingPermissionsToUser(User user,
+            IEnumerable<long> permissionsShouldBeIds)
+        {
+            var newPermissionsConnections = new List<UserPermissionReturnDto>();
+            var permissionsToAddIds =
+                permissionsShouldBeIds.Except(user.Permissions.Select(e => e.Permission.Id).ToArray()).ToList();
+            if (permissionsToAddIds.Count != 0)
+            {
+                newPermissionsConnections =
+                    await _usersPermissionsService.AddPermissionsToUserAsync(user.Id, permissionsToAddIds);
+            }
+
+            return newPermissionsConnections;
+        }
+
+        private async Task<List<UserRoleReturnDto>> AddMissingRolesToUser(User user,
+            IEnumerable<long> rolesShouldBeIds)
+        {
+            var newRolesConnections = new List<UserRoleReturnDto>();
+            var rolesToAddIds =
+                rolesShouldBeIds.Except(user.Roles.Select(e => e.Role.Id).ToArray()).ToList();
+            if (rolesToAddIds.Count != 0)
+            {
+                newRolesConnections =
+                    await _usersRolesService.AddRolesToUserAsync(user.Id, rolesToAddIds);
+            }
+
+            return newRolesConnections;
+        }
+
+        private async Task<List<UsersPermissions>> DeleteExcessPermissionsFromUser(User user,
+            IEnumerable<long> permissionsShouldBeIds)
+        {
+            var permissionsToDeleteIds =
+                user.Permissions.Select(e => e.Permission.Id).ToArray().Except(permissionsShouldBeIds).ToList();
+            if (permissionsToDeleteIds.Count == 0) return new List<UsersPermissions>();
+
+            await _usersPermissionsService.DeletePermissionsFromUserAsync(user, permissionsToDeleteIds);
+            return user.Permissions.Where(e => !permissionsToDeleteIds.Contains(e.Id)).ToList();
+        }
+
+        private async Task<List<UsersRoles>> DeleteExcessRolesFromUser(User user,
+            IEnumerable<long> rolesShouldBeIds)
+        {
+            var rolesToDeleteIds =
+                user.Roles.Select(e => e.Role.Id).ToArray().Except(rolesShouldBeIds).ToList();
+            if (rolesToDeleteIds.Count == 0) return new List<UsersRoles>();
+
+            await _usersRolesService.DeleteRolesFromUserAsync(user, rolesToDeleteIds);
+            return user.Roles.Where(e => !rolesToDeleteIds.Contains(e.Id)).ToList();
         }
     }
 }

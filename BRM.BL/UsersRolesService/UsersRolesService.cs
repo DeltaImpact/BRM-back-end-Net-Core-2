@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BRM.BL.Exceptions;
+using BRM.BL.Extensions.RoleDtoExtensions;
 using BRM.BL.Extensions.UserRoleExtensions;
 using BRM.BL.Models;
 using BRM.BL.Models.RoleDto;
@@ -67,22 +68,19 @@ namespace BRM.BL.UsersRolesService
 
         public async Task<List<UserRoleReturnDto>> DeleteRolesFromUserAsync(User user, ICollection<long> rolesId)
         {
-            var roles = await _roleRepository.GetAllAsync(o => rolesId.Contains(o.Id));
-            foreach (var role in roles)
+            var userToRolesConnections =
+                await (await _usersRolesRepository.GetAllAsync(
+                        d => d.User == user && rolesId.Contains(d.Role.Id),
+                        i => i.Role))
+                    .ToListAsync();
+            foreach (var item in userToRolesConnections)
             {
-                if (!rolesId.Contains(role.Id)) throw new ObjectNotFoundException("Role not found.");
+                if (!rolesId.Contains(item.Role.Id))
+                    throw new ObjectNotFoundException("Permission not found.");
             }
 
-            var rolesToRemove = roles.Select(role =>
-                new UsersRoles
-                {
-                    Role = role,
-                    User = user
-                }).ToArray();
-
-            var disconnections = (await _usersRolesRepository.RemoveManyAsync(rolesToRemove))
-                .Select(o => o.ToUserRoleReturnDto()).ToList();
-            return disconnections;
+            await _usersRolesRepository.RemoveManyAsync(userToRolesConnections);
+            return userToRolesConnections.Select(e => e.ToUserRoleReturnDto()).ToList();
         }
 
 

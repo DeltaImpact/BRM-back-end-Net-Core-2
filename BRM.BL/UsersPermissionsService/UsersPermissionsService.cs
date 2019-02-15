@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BRM.BL.Exceptions;
+using BRM.BL.Extensions.PermissionDtoExtensions;
 using BRM.BL.Extensions.UserPermissionExtensions;
 using BRM.BL.Models;
 using BRM.BL.Models.PermissionDto;
@@ -107,27 +108,6 @@ namespace BRM.BL.UsersPermissionsService
             return connections;
         }
 
-        public async Task<List<UserPermissionReturnDto>> DeletePermissionsToUserAsync(User user,
-            ICollection<long> permissionsId)
-        {
-            var roles = await _permissionRepository.GetAllAsync(o => permissionsId.Contains(o.Id));
-            foreach (var role in roles)
-            {
-                if (!permissionsId.Contains(role.Id)) throw new ObjectNotFoundException("Role not found.");
-            }
-
-            var rolesToRemove = roles.Select(permission =>
-                new UsersPermissions()
-                {
-                    Permission = permission,
-                    User = user
-                }).ToArray();
-
-            var disconnections = (await _usersPermissionsRepository.RemoveManyAsync(rolesToRemove))
-                .Select(o => o.ToUserPermissionReturnDto()).ToList();
-            return disconnections;
-        }
-
         public async Task DeletePermissionFromUserAsync(long userId, long permissionId)
         {
             var user =
@@ -152,6 +132,24 @@ namespace BRM.BL.UsersPermissionsService
             var removedPermission = await _usersPermissionsRepository.RemoveAsync(userToPermissionConnection);
             //return removedPermission.ToUserPermissionReturnDto();
             //return await _userService.GetUserAsync(removedPermission.User.UserName);
+        }
+
+        public async Task<List<UserPermissionReturnDto>> DeletePermissionsFromUserAsync(User user,
+            List<long> permissionIds)
+        {
+            var userToPermissionsConnections =
+                await (await _usersPermissionsRepository.GetAllAsync(
+                        d => d.User == user && permissionIds.Contains(d.Permission.Id),
+                        i => i.Permission))
+                    .ToListAsync();
+            foreach (var item in userToPermissionsConnections)
+            {
+                if (!permissionIds.Contains(item.Permission.Id))
+                    throw new ObjectNotFoundException("Permission not found.");
+            }
+
+            await _usersPermissionsRepository.RemoveManyAsync(userToPermissionsConnections);
+            return userToPermissionsConnections.Select(e => e.ToUserPermissionReturnDto()).ToList();
         }
 
         public Task<UserPermissionReturnDto> AddPermissionToUserAsync(UserRoleOrPermissionUpdateDto dto)
