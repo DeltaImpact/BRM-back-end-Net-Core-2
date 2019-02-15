@@ -7,7 +7,7 @@ namespace BRM.BL.Models.UserDto
     public class UserAddDto
     {
         [Required] public string Username { get; set; }
-        [Required] public ICollection<long> RolesId { get; set; }
-        [Required] public ICollection<long> PermissionsId { get; set; }
+        [Required] public ICollection<long> RolesIds { get; set; }
+        [Required] public ICollection<long> PermissionsIds { get; set; }
     }
 }
