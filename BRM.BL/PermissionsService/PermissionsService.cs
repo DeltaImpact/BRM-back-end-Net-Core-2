@@ -95,7 +95,7 @@ namespace BRM.BL.PermissionsService
             }
 
             var permission =
-                await _permissionService.UpdateAsync(model.ToPermission());
+                await _permissionService.UpdateAsync(model.ToPermission(permissionOld));
             return permission.ToPermissionReturnDto();
         }
     }

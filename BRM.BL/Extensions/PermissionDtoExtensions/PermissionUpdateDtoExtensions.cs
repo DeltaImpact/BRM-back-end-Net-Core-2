@@ -14,5 +14,11 @@ namespace BRM.BL.Extensions.PermissionDtoExtensions
             };
             return permission;
         }
+
+        public static Permission ToPermission(this PermissionUpdateDto model, Permission permissionOld)
+        {
+            permissionOld.Name = model.Name;
+            return permissionOld;
+        }
     }
 }
